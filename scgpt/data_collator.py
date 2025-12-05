@@ -40,7 +40,7 @@ class DataCollator:
     do_mlm: bool = True
     do_binning: bool = True
     mlm_probability: float = 0.15
-    mask_value: int = -1
+    mask_value: int = -1 # TODO: look more into this - it may allow use to customise the value used during training
     max_length: Optional[int] = None
     sampling: bool = True
     keep_first_n_tokens: int = 1
@@ -112,6 +112,7 @@ class DataCollator:
 
         return data_dict
 
+    # ! Key function to look at!!
     def _mask(self, expressions: torch.Tensor) -> torch.Tensor:
         """
         Mask the expression values with MLM.

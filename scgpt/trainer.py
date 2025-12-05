@@ -181,7 +181,7 @@ def train(
     optimizer,
     scheduler,
     device,
-    config,
+    config, # TODO: look at this more 
     logger,
     epoch,
 ) -> None:
@@ -190,7 +190,7 @@ def train(
     """
     import wandb
 
-    model.train()
+    model.train() # TODO: verify the function of this
     total_loss, total_gep, total_cls, total_gepc, total_ecs, total_dab = (
         0.0,
         0.0,
@@ -234,31 +234,32 @@ def train(
             )
 
             masked_positions = input_values.eq(
-                config.mask_value
+                config.mask_value # ! Masks and predicts for certain positions - given by the configurations - check how this would be used
             )  # the postions to predict
             loss = 0.0
             metrics_to_log = {}
+            # TODO: check the different types of config and then also check the config data structure
             if config.GEP:
-                loss_gep = criterion_gep_gepc(
+                loss_gep = criterion_gep_gepc( # ? : What does this function do?
                     output_dict["mlm_output"], target_values, masked_positions
                 )
                 loss = loss + loss_gep
                 metrics_to_log = {"train/gep": loss_gep.item()}
             if config.GEP and config.explicit_zero_prob:
-                loss_zero_log_prob = criterion_neg_log_bernoulli(
+                loss_zero_log_prob = criterion_neg_log_bernoulli( # ? : What does this function do?
                     output_dict["mlm_zero_probs"], target_values, masked_positions
                 )
                 loss = loss + loss_zero_log_prob
                 metrics_to_log.update({"train/nzlp": loss_zero_log_prob.item()})
 
             if config.GEPC:
-                loss_gepc = criterion_gep_gepc(
+                loss_gepc = criterion_gep_gepc( # ? : What does this function do?
                     output_dict["mvc_output"], target_values, masked_positions
                 )
                 loss = loss + loss_gepc
                 metrics_to_log.update({"train/mvc": loss_gepc.item()})
 
-            if config.GEPC and config.explicit_zero_prob:
+            if config.GEPC and config.explicit_zero_prob: # ? : What does this function do?
                 loss_gepc_zero_log_prob = criterion_neg_log_bernoulli(
                     output_dict["mvc_zero_probs"], target_values, masked_positions
                 )
