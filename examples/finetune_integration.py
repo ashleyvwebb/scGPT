@@ -382,6 +382,7 @@ def prepare_dataloader(
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ntokens = len(vocab)  # size of vocabulary
+# TODO: look here 
 model = TransformerModel(
     ntokens,
     embsize,
