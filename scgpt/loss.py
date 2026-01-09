@@ -10,7 +10,7 @@ import torch.nn.functional as F
  # returns a tensor 
  # ? A tensor is a multi-dimensional matrix containing elements of a single data type
  # ? When a tensor is created with 'requires_grad=True', then torch.autograd records operations on them for automatic differentiation
-def masked_mse_loss( # TODO: What does this do?
+def masked_mse_loss(
     input: torch.Tensor, target: torch.Tensor, mask: torch.Tensor
 ) -> torch.Tensor:
     """
@@ -20,7 +20,11 @@ def masked_mse_loss( # TODO: What does this do?
     loss = F.mse_loss(input * mask, target * mask, reduction="sum")
     return loss / mask.sum()
 
-
+# ! Used to calculate the citerion negative log bernoulli
+# Also known as binary cross-entropy loss or log loss
+# This is equivalent to the negative log likelihood for a bernoulli distribution
+# Bernoulli distribution is a special type of binomial distribution
+# which takes value 1 with probability p, and value 0 with probability 1 - p
 def criterion_neg_log_bernoulli(
     input: torch.Tensor, target: torch.Tensor, mask: torch.Tensor
 ) -> torch.Tensor:
@@ -32,7 +36,7 @@ def criterion_neg_log_bernoulli(
     masked_log_probs = bernoulli.log_prob((target > 0).float()) * mask
     return -masked_log_probs.sum() / mask.sum()
 
-
+# ! Used to calculate the relative error
 def masked_relative_error(
     input: torch.Tensor, target: torch.Tensor, mask: torch.LongTensor
 ) -> torch.Tensor:
