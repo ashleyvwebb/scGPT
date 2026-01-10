@@ -46,6 +46,8 @@ sc.set_figure_params(figsize=(4, 4))
 os.environ["KMP_WARNINGS"] = "off"
 # os.environ["WANDB_MODE"] = "offline"
 
+# !!! Very important for the configuration of the model - the mask ratio etc.
+# INFO: this is essentially what sets up the config initially
 hyperparameter_defaults = dict(
     seed=42,
     dataset_name="PBMC_10K",
