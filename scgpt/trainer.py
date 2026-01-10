@@ -234,7 +234,7 @@ def train(
             )
 
             masked_positions = input_values.eq(
-                config.mask_value # ! Masks and predicts for certain positions - given by the configurations - check how this would be used
+                config.mask_value # TODO: ! Masks and predicts for certain positions - given by the configurations - check how this would be used
             )  # the postions to predict
             loss = 0.0
             metrics_to_log = {}
