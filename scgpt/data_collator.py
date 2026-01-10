@@ -61,6 +61,7 @@ class DataCollator:
                 f"({self.max_length})."
             )
 
+    # TODO: have a look at where this is used
     def __call__(
         self, examples: List[Dict[str, torch.Tensor]]
     ) -> Dict[str, torch.Tensor]:
@@ -112,6 +113,7 @@ class DataCollator:
 
         return data_dict
 
+    # TODO: have a look at where this is used
     # ! Key function to look at!!
     def _mask(self, expressions: torch.Tensor) -> torch.Tensor:
         """
