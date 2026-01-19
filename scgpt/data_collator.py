@@ -37,8 +37,8 @@ class DataCollator:
     do_padding: bool = True
     pad_token_id: Optional[int] = None
     pad_value: int = 0
-    do_mlm: bool = True
-    do_binning: bool = True
+    do_mlm: bool = True # TODO: look into this
+    do_binning: bool = True # TODO: look into this - binning of expression values
     mlm_probability: float = 0.15
     mask_value: int = -1 # TODO: look more into this - it may allow use to customise the value used during training
     max_length: Optional[int] = None

@@ -271,6 +271,7 @@ def _digitize(x: np.ndarray, bins: np.ndarray, side="both") -> np.ndarray:
     return digits
 
 
+# TODO: investigate this - need to figure out exactly how it is used
 def binning(
     row: Union[np.ndarray, torch.Tensor], n_bins: int
 ) -> Union[np.ndarray, torch.Tensor]:
