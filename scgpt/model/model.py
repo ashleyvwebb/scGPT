@@ -88,9 +88,9 @@ class TransformerModel(nn.Module):
         #! Stopped HERE
 
         # Value Encoder, NOTE: the scaling style is also handled in _encode method
-        if input_emb_style == "continuous":
+        if input_emb_style == "continuous": # the whole human pretrained model uses this style
             self.value_encoder = ContinuousValueEncoder(d_model, dropout)
-        elif input_emb_style == "category":
+        elif input_emb_style == "category": # ? not as important to look at for the time being
             assert n_input_bins > 0
             self.value_encoder = CategoryValueEncoder(
                 n_input_bins, d_model, padding_idx=pad_value
