@@ -28,31 +28,31 @@ from .grad_reverse import grad_reverse
 class TransformerModel(nn.Module):
     def __init__(
         self,
-        ntoken: int,
-        d_model: int,
-        nhead: int,
-        d_hid: int,
-        nlayers: int,
-        nlayers_cls: int = 3,
-        n_cls: int = 1,
-        vocab: Any = None,
-        dropout: float = 0.5,
-        pad_token: str = "<pad>",
-        pad_value: int = 0,
-        do_mvc: bool = False,
-        do_dab: bool = False,
-        use_batch_labels: bool = False,
-        num_batch_labels: Optional[int] = None,
-        domain_spec_batchnorm: Union[bool, str] = False,
-        input_emb_style: str = "continuous",
-        n_input_bins: Optional[int] = None,
-        cell_emb_style: str = "cls",
-        mvc_decoder_style: str = "inner product",
-        ecs_threshold: float = 0.3,
-        explicit_zero_prob: bool = False,
+        ntoken: int, # vocab size for gene tokens
+        d_model: int, # embedding dimension - or number of expected features in the encoder/decoder inputs
+        nhead: int, # number of attention heads
+        d_hid: int, # the dimensions of the feedfowrard network model
+        nlayers: int, # number of stacked transformer encoder/decoder layers
+        nlayers_cls: int = 3, # number of layers in the classification decoder
+        n_cls: int = 1, # size of output used in classification decoder
+        vocab: Any = None, # vocabulary object used
+        dropout: float = 0.5, # the dropout value 
+        pad_token: str = "<pad>", # used to fill shorter sequences in a bit, to ensure all cell input vectors have the same uniform length
+        pad_value: int = 0, # pad value for expression values
+        do_mvc: bool = False, # determines whether the model should do masked value prediction for cell embedding - also known as GEPC
+        do_dab: bool = False, # determines whether to use a domain adversarial loss to ensure that the learned cell embeddings are independent of the batch ID
+        use_batch_labels: bool = False, # whether to incorporate batch-specific info
+        num_batch_labels: Optional[int] = None, # number of unique batch labels, required if use_batch_labels is True
+        domain_spec_batchnorm: Union[bool, str] = False, # domain specific batch normalization or not, can be True/False or "dsbn"/"do_affine"/"batchnorm"
+        input_emb_style: str = "continuous", # how to encode the input expression values, can be "continuous", "category" or "scaling"
+        n_input_bins: Optional[int] = None, # number of bins to discretize the input expression values if input_emb_style is "category"
+        cell_emb_style: str = "cls", # how to get the cell embedding from the transformer output, can be "cls", "avg-pool" or "w-pool"
+        mvc_decoder_style: str = "inner product", # the architecture style for the masked value prediction decoder, can be "inner product" or "mlp"
+        ecs_threshold: float = 0.3, # Elastic Cell Similarity threshold, similarity between cells in a latent space
+        explicit_zero_prob: bool = False, # whether to explicitly model the zero values with a separate probability output, which is used in both MLM and MVC decoders. If True, the model will have an additional output "zero_probs" for both MLM and MVC, which can be used to sample zero values during generation.
         use_fast_transformer: bool = False,
         fast_transformer_backend: str = "flash",
-        pre_norm: bool = False,
+        pre_norm: bool = False, # determines position of layer normalisation within each transformer block, when true, layer normalisation is applied before the self-attention and feed-forward sub-layers. Otherwise it is applied after 
     ):
         super().__init__()
         self.model_type = "Transformer"
@@ -84,6 +84,8 @@ class TransformerModel(nn.Module):
 
         # TODO: add dropout in the GeneEncoder
         self.encoder = GeneEncoder(ntoken, d_model, padding_idx=vocab[pad_token])
+
+        #! Stopped HERE
 
         # Value Encoder, NOTE: the scaling style is also handled in _encode method
         if input_emb_style == "continuous":
@@ -723,15 +725,15 @@ class FlashTransformerEncoderLayer(nn.Module):
 class GeneEncoder(nn.Module):
     def __init__(
         self,
-        num_embeddings: int,
-        embedding_dim: int,
-        padding_idx: Optional[int] = None,
+        num_embeddings: int, # number of genes in the vocab
+        embedding_dim: int,  # number of expected features in the input
+        padding_idx: Optional[int] = None, # the index of the padding token in the vocab
     ):
-        super().__init__()
+        super().__init__() # initialise internal module state of the parent class
         self.embedding = nn.Embedding(
             num_embeddings, embedding_dim, padding_idx=padding_idx
-        )
-        self.enc_norm = nn.LayerNorm(embedding_dim)
+        ) # A simple lookup table that stores embeddings of a fixed dictionary and size. Use to store the gene token embeddings and retrieve them based on the input gene token ids. The embedding layer will be randomly initialized and then trained together with the rest of the model. The embedding for the padding token will be initialized to zeros and will not be updated during training.
+        self.enc_norm = nn.LayerNorm(embedding_dim) # Applies Layer Normalisation over a mini-batch of inputs. it takes an input the shape of the input the layer should expect.
 
     def forward(self, x: Tensor) -> Tensor:
         x = self.embedding(x)  # (batch, seq_len, embsize)
