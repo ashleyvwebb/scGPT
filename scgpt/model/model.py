@@ -85,7 +85,6 @@ class TransformerModel(nn.Module):
         # TODO: add dropout in the GeneEncoder
         self.encoder = GeneEncoder(ntoken, d_model, padding_idx=vocab[pad_token])
 
-        #! Stopped HERE
 
         # Value Encoder, NOTE: the scaling style is also handled in _encode method
         if input_emb_style == "continuous": # the whole human pretrained model uses this style
@@ -101,10 +100,10 @@ class TransformerModel(nn.Module):
             # TODO: Correct handle the mask_value when using scaling
 
         # Batch Encoder
-        if use_batch_labels:
+        if use_batch_labels: # ! assume this is false in whole human model as cannot see it in the arguments list
             self.batch_encoder = BatchLabelEncoder(num_batch_labels, d_model)
 
-        if domain_spec_batchnorm is True or domain_spec_batchnorm == "dsbn":
+        if domain_spec_batchnorm is True or domain_spec_batchnorm == "dsbn": # ! assume this is False in whole human model as cannot see it in the arguments list
             use_affine = True if domain_spec_batchnorm == "do_affine" else False
             print(f"Use domain specific batchnorm with affine={use_affine}")
             self.dsbn = DomainSpecificBatchNorm1d(
@@ -114,8 +113,8 @@ class TransformerModel(nn.Module):
             print("Using simple batchnorm instead of domain specific batchnorm")
             self.bn = nn.BatchNorm1d(d_model, eps=6.1e-5)
 
-        if use_fast_transformer:
-            if fast_transformer_backend == "linear":
+        if use_fast_transformer: # this was true in the training - but in theory shouldnt have any difference between it being true or not
+            if fast_transformer_backend == "linear": # backend not defined so would default to flash
                 self.transformer_encoder = FastTransformerEncoderWrapper(
                     d_model, nhead, d_hid, nlayers, dropout
                 )
@@ -126,9 +125,9 @@ class TransformerModel(nn.Module):
                     d_hid,
                     dropout,
                     batch_first=True,
-                    norm_scheme=self.norm_scheme,
+                    norm_scheme=self.norm_scheme, # pre-norm for the whole human pretrained model
                 )
-                self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers)
+                self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers) # stack nlayers of the same encoder layer, which is the standard transformer architecture. The encoder layer is defined above as FlashTransformerEncoderLayer, which is modified from the standard TransformerEncoderLayer to support flash attention and flexible normalization scheme.
         else:
             encoder_layers = TransformerEncoderLayer(
                 d_model, nhead, d_hid, dropout, batch_first=True
@@ -139,7 +138,7 @@ class TransformerModel(nn.Module):
             d_model,
             explicit_zero_prob=explicit_zero_prob,
             use_batch_labels=use_batch_labels,
-        )
+        ) # the decoder for the masked language modeling (MLM) objective, which predicts the gene expression values based on the transformer output. The decoder will have a linear layer to predict the expression values, and if explicit_zero_prob is True, it will also have a separate output for the probability of zero values. If use_batch_labels is True, the batch embedding will be concatenated to the transformer output before feeding into the decoder.
         self.cls_decoder = ClsDecoder(d_model, n_cls, nlayers=nlayers_cls)
         if do_mvc:
             self.mvc_decoder = MVCDecoder(
@@ -771,11 +770,11 @@ class ContinuousValueEncoder(nn.Module):
 
     def __init__(self, d_model: int, dropout: float = 0.1, max_value: int = 512):
         super().__init__()
-        self.dropout = nn.Dropout(p=dropout)
-        self.linear1 = nn.Linear(1, d_model)
-        self.activation = nn.ReLU()
-        self.linear2 = nn.Linear(d_model, d_model)
-        self.norm = nn.LayerNorm(d_model)
+        self.dropout = nn.Dropout(p=dropout) # during training, randomly zeroes some of the elements of the input tensor with probability p
+        self.linear1 = nn.Linear(1, d_model) # applies an affine linear transformation to the incoming data: y = xA^T + b. Here the input is a single real value (hence the input dimension is 1) and the output is a vector of dimension d_model. This is used to encode the continuous values associated with each gene token into a vector that can be added to the gene token embedding.
+        self.activation = nn.ReLU() # Applies the ReLU function element-wise. ReLU(x) = max(0, x). This is used as the activation function after the first linear layer to introduce non-linearity into the value encoding.
+        self.linear2 = nn.Linear(d_model, d_model) # another linear layer that takes the output of the first linear layer (after activation) and projects it back to the same dimension d_model. This allows for more complex transformations of the input value.
+        self.norm = nn.LayerNorm(d_model) # applies Layer Normalisation over a mini-batch of inputs. This is used to stabilize the training of the value encoder by normalizing the output of the second linear layer.
         self.max_value = max_value
 
     def forward(self, x: Tensor) -> Tensor:
@@ -785,13 +784,13 @@ class ContinuousValueEncoder(nn.Module):
         """
         # TODO: test using actual embedding layer if input is categorical
         # expand last dimension
-        x = x.unsqueeze(-1)
+        x = x.unsqueeze(-1) # change the shape from [batch_size, seq_len] to [batch_size, seq_len, 1] so that it can be fed into the linear layer which expects input of shape [batch_size, seq_len, input_dim]. The input_dim here is 1 because we are encoding a single real value for each gene token.
         # clip x to [-inf, max_value]
-        x = torch.clamp(x, max=self.max_value)
-        x = self.activation(self.linear1(x))
-        x = self.linear2(x)
-        x = self.norm(x)
-        return self.dropout(x)
+        x = torch.clamp(x, max=self.max_value) # clip the input values to a maximum value to prevent extremely large values that could destabilize training. The minimum value is not set, so it can be as low as -inf.
+        x = self.activation(self.linear1(x)) # apply the first linear layer to project the input value to a d_model dimensional vector, then apply the ReLU activation function to introduce non-linearity.
+        x = self.linear2(x) # apply the second linear layer to further transform the value encoding. The output is still of dimension d_model.
+        x = self.norm(x) # apply layer normalization to the output of the second linear layer to stabilize training. This normalizes the output across the feature dimension (d_model) for each token in the sequence.
+        return self.dropout(x) # apply dropout to the final output of the value encoder. This helps prevent overfitting by randomly zeroing out some of the elements in the output vector during training.
 
 
 class CategoryValueEncoder(nn.Module):
@@ -855,33 +854,33 @@ class ExprDecoder(nn.Module):
         use_batch_labels: bool = False,
     ):
         super().__init__()
-        d_in = d_model * 2 if use_batch_labels else d_model
+        d_in = d_model * 2 if use_batch_labels else d_model # if use_batch_labels is True, the input to the decoder will be the concatenation of the cell embedding and the batch embedding, so the input dimension will be 2 * d_model. Otherwise, the input dimension will be d_model.
         self.fc = nn.Sequential(
-            nn.Linear(d_in, d_model),
+            nn.Linear(d_in, d_model), # hidden layer 1
             nn.LeakyReLU(),
-            nn.Linear(d_model, d_model),
+            nn.Linear(d_model, d_model), # hidden layer 2
             nn.LeakyReLU(),
-            nn.Linear(d_model, 1),
-        )
+            nn.Linear(d_model, 1), # output layer
+        ) # a simple feedforward neural network with two hidden layers and LeakyReLU activation functions. The output layer has a single unit which will predict the expression value for each gene token. The input dimension is d_in, which depends on whether batch labels are used or not.
         self.explicit_zero_prob = explicit_zero_prob
         if explicit_zero_prob:
-            self.zero_logit = nn.Sequential(
+            self.zero_logit = nn.Sequential( # logit is the raw, unnormlaised output of a model before applying a sigmoid or softmax.
                 nn.Linear(d_in, d_model),
                 nn.LeakyReLU(),
                 nn.Linear(d_model, d_model),
                 nn.LeakyReLU(),
                 nn.Linear(d_model, 1),
-            )
+            ) # if explicit_zero_prob is True, an additional feedforward network is defined to predict the logit for the probability of the expression being zero. This network has the same architecture as the main prediction network but outputs a single logit which will be passed through a sigmoid function to get the probability of zero expression.
 
     def forward(self, x: Tensor) -> Dict[str, Tensor]:
         """x is the output of the transformer, (batch, seq_len, d_model)"""
-        pred_value = self.fc(x).squeeze(-1)  # (batch, seq_len)
+        pred_value = self.fc(x).squeeze(-1)  # (batch, seq_len) the predicted expression values for each gene token. The output of the fc network is of shape (batch, seq_len, 1) and we squeeze the last dimension to get (batch, seq_len).
 
         if not self.explicit_zero_prob:
-            return dict(pred=pred_value)
-        zero_logits = self.zero_logit(x).squeeze(-1)  # (batch, seq_len)
-        zero_probs = torch.sigmoid(zero_logits)
-        return dict(pred=pred_value, zero_probs=zero_probs)
+            return dict(pred=pred_value) # if explicit_zero_prob is False, we simply return the predicted expression values in a dictionary with the key "pred". The zero probability is not explicitly modeled in this case.
+        zero_logits = self.zero_logit(x).squeeze(-1)  # (batch, seq_len) the predicted logits for the probability of zero expression for each gene token. Similar to pred_value, we squeeze the last dimension to get (batch, seq_len).
+        zero_probs = torch.sigmoid(zero_logits) # apply the sigmoid function to the zero logits to get the probabilities of zero expression. The sigmoid function maps the logits to a range between 0 and 1, which can be interpreted as probabilities.
+        return dict(pred=pred_value, zero_probs=zero_probs) # we return both the predicted expression values and the zero probabilities in a dictionary. The key "pred" corresponds to the predicted expression values, and the key "zero_probs" corresponds to the probabilities of zero expression for each gene token. This allows the model to explicitly account for the possibility of zero expression, which can be important in single-cell gene expression data where many genes may not be expressed in a given cell.
         # TODO: note that the return currently is only for training. Since decoder
         # is not used in the test setting for the integration task, the eval/inference
         # logic is not implemented yet. However, remember to implement it when
