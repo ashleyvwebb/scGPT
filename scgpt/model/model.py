@@ -845,7 +845,7 @@ class Similarity(nn.Module):
     def forward(self, x, y):
         return self.cos(x, y) / self.temp
 
-
+#! Very Important for the masking strategy - we could run this forward on a single cell's data in order to get the predicted expression values for the genes - confrim this with the forward pass for the model and the training process
 class ExprDecoder(nn.Module):
     def __init__(
         self,
