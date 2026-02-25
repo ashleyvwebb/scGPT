@@ -888,7 +888,7 @@ class ExprDecoder(nn.Module):
         # to sample from the bernoulli distribution with the zero_probs.
 
 
-class ClsDecoder(nn.Module):
+class ClsDecoder(nn.Module): # the classification tasks are the cell type classification and the batch classification.
     """
     Decoder for classification task.
     """
@@ -900,14 +900,14 @@ class ClsDecoder(nn.Module):
         nlayers: int = 3,
         activation: callable = nn.ReLU,
     ):
-        super().__init__()
+        super().__init__() # initialise internal module state of the parent class
         # module list
-        self._decoder = nn.ModuleList()
-        for i in range(nlayers - 1):
+        self._decoder = nn.ModuleList() # a list to hold the layers of the decoder. We will append linear layers, activation functions, and layer normalization layers to this list in a loop based on the number of layers specified by nlayers.
+        for i in range(nlayers - 1): # use a ModuleList as the number of layers is determined by the nlayers parameter. We loop through nlayers - 1 because the last layer will be the output layer which is defined separately after the loop.
             self._decoder.append(nn.Linear(d_model, d_model))
             self._decoder.append(activation())
             self._decoder.append(nn.LayerNorm(d_model))
-        self.out_layer = nn.Linear(d_model, n_cls)
+        self.out_layer = nn.Linear(d_model, n_cls) # the output layer of the decoder which maps the final hidden representation to the number of classes (n_cls). This will be used to predict the class probabilities for each cell based on its embedding.
 
     def forward(self, x: Tensor) -> Tensor:
         """
@@ -915,8 +915,8 @@ class ClsDecoder(nn.Module):
             x: Tensor, shape [batch_size, embsize]
         """
         for layer in self._decoder:
-            x = layer(x)
-        return self.out_layer(x)
+            x = layer(x) # run each layer in the decoder sequentially, this cannot be done using sequential as we dont know how many sets of these layers we will need.
+        return self.out_layer(x) # after passing through the hidden layers, we apply the output layer to get the final class logits. The output shape will be [batch_size, n_cls], which can then be used to compute the classification loss during training.
 
 
 class MVCDecoder(nn.Module):
