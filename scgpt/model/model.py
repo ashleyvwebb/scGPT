@@ -140,7 +140,7 @@ class TransformerModel(nn.Module):
             use_batch_labels=use_batch_labels,
         ) # the decoder for the masked language modeling (MLM) objective, which predicts the gene expression values based on the transformer output. The decoder will have a linear layer to predict the expression values, and if explicit_zero_prob is True, it will also have a separate output for the probability of zero values. If use_batch_labels is True, the batch embedding will be concatenated to the transformer output before feeding into the decoder.
         self.cls_decoder = ClsDecoder(d_model, n_cls, nlayers=nlayers_cls)
-        if do_mvc:
+        if do_mvc: # determines whether the model should do masked value prediction for cell embedding - also known as GEPC. If True, the model will have an additional decoder (MVCDecoder) to predict the expression values of the masked genes based on the cell embedding. This is a key component for the GEPC objective, which aims to improve the quality of the learned cell embeddings by predicting the expression values of masked genes.
             self.mvc_decoder = MVCDecoder(
                 d_model,
                 arch_style=mvc_decoder_style,
@@ -946,9 +946,9 @@ class MVCDecoder(nn.Module):
         super().__init__()
         d_in = d_model * 2 if use_batch_labels else d_model
         if arch_style in ["inner product", "inner product, detach"]:
-            self.gene2query = nn.Linear(d_model, d_model)
-            self.query_activation = query_activation()
-            self.W = nn.Linear(d_model, d_in, bias=False)
+            self.gene2query = nn.Linear(d_model, d_model) # a linear layer that projects the gene embeddings to query vectors. The input and output dimensions are both d_model, which means we are transforming the gene embeddings into a new space of the same dimension to be used as queries for the inner product calculation.
+            self.query_activation = query_activation() # the activation function applied to the query vectors after the linear transformation. This can be a non-linear activation function like Sigmoid or ReLU, which can help the model learn more complex relationships between the gene embeddings and the cell embedding.
+            self.W = nn.Linear(d_model, d_in, bias=False) # a linear layer that projects the query vectors to the same dimension as the cell embedding (d_in). This layer is used to compute the inner product between the query vectors and the cell embedding to predict the expression values. The bias is set to False because we want the inner product to be purely based on the transformed query vectors and the cell embedding without any additional bias term.
             if explicit_zero_prob:  # by default, gene-wise prob rate
                 self.W_zero_logit = nn.Linear(d_model, d_in)
         elif arch_style == "concat query":
@@ -980,9 +980,10 @@ class MVCDecoder(nn.Module):
         """
         gene_embs = gene_embs.detach() if self.do_detach else gene_embs
         if self.arch_style in ["inner product", "inner product, detach"]:
-            query_vecs = self.query_activation(self.gene2query(gene_embs))
+            query_vecs = self.query_activation(self.gene2query(gene_embs)) # (batch, seq_len, embsize) the query vectors obtained by applying a linear transformation and an activation function to the gene embeddings. These query vectors will be used to compute the inner product with the cell embedding to predict the expression values for each gene token.
             cell_emb = cell_emb.unsqueeze(2)  # (batch, embsize, 1)
             # the pred gene expr values, # (batch, seq_len)
+            # ? torch.bmm is batch matrix multiplication, it performs a matrix multiplication for each sample in the batch. The first argument is of shape (batch, seq_len, embsize) and the second argument is of shape (batch, embsize, 1), so the output will be of shape (batch, seq_len, 1). We then squeeze the last dimension to get (batch, seq_len) which represents the predicted expression values for each gene token in the sequence for each cell in the batch.
             pred_value = torch.bmm(self.W(query_vecs), cell_emb).squeeze(2)
             if not self.explicit_zero_prob:
                 return dict(pred=pred_value)
