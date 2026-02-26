@@ -153,17 +153,18 @@ class TransformerModel(nn.Module):
                 d_model,
                 n_cls=num_batch_labels,
                 reverse_grad=True,
-            )
+            ) # the discriminator used for the domain adversarial loss, which aims to make the learned cell embeddings independent of the batch ID. The discriminator takes the cell embedding as input and tries to predict the batch label. The grad_reverse flag indicates whether to reverse the gradients during backpropagation, which is a common technique in domain adversarial training to encourage the encoder to learn batch-invariant features.
 
-        self.sim = Similarity(temp=0.5)  # TODO: auto set temp
-        self.creterion_cce = nn.CrossEntropyLoss()
+        self.sim = Similarity(temp=0.5)  # the similarity function used for the contrastive cell embedding objective (CCE), which computes the cosine similarity between cell embeddings. The temperature parameter temp is used to scale the similarities before applying the contrastive loss, which can help improve the training of the contrastive objective.
+        self.creterion_cce = nn.CrossEntropyLoss() # the loss function used for the contrastive cell embedding objective (CCE), which is a cross-entropy loss applied to the similarity scores between cell embeddings. The CCE objective encourages the model to learn cell embeddings that are similar for cells of the same type and dissimilar for cells of different types, which can improve the quality of the learned cell representations.
 
-        self.init_weights()
+        self.init_weights() # initialise the weights of the model for the gene encoder to be between 0.1 and -0.1 
 
     def init_weights(self) -> None:
         initrange = 0.1
         # TODO: check if this initialization is helpful and shall we apply to all?
         self.encoder.embedding.weight.data.uniform_(-initrange, initrange)
+        # this fills the weight tensor with numbers smapled from the continuous unifrom distribution f(x) = 1 /(-0.1 - 0.1)
 
     def _encode(
         self,
@@ -843,7 +844,7 @@ class Similarity(nn.Module):
         self.cos = nn.CosineSimilarity(dim=-1)
 
     def forward(self, x, y):
-        return self.cos(x, y) / self.temp
+        return self.cos(x, y) / self.temp # this does the dot product of the two vectors along the last dimension and then divides by the temperature. The cosine similarity is computed as the dot product of the two vectors divided by the product of their magnitudes. By dividing by the temperature, we can control the scale of the similarity scores, which can be important for training stability and performance in contrastive learning settings.
 
 #! Very Important for the masking strategy - we could run this forward on a single cell's data in order to get the predicted expression values for the genes - confrim this with the forward pass for the model and the training process
 class ExprDecoder(nn.Module):
@@ -1028,11 +1029,11 @@ class AdversarialDiscriminator(nn.Module):
         super().__init__()
         # module list
         self._decoder = nn.ModuleList()
-        for i in range(nlayers - 1):
+        for i in range(nlayers - 1): # use a ModuleList as the number of layers is determined by the nlayers parameter. We loop through nlayers - 1 because the last layer will be the output layer which is defined separately after the loop.
             self._decoder.append(nn.Linear(d_model, d_model))
             self._decoder.append(activation())
             self._decoder.append(nn.LayerNorm(d_model))
-        self.out_layer = nn.Linear(d_model, n_cls)
+        self.out_layer = nn.Linear(d_model, n_cls) # the output layer of the discriminator which maps the final hidden representation to the number of classes (n_cls). This will be used to predict the batch labels for each cell based on its embedding. During adversarial training, we want to minimize the classification loss for the main task (e.g., gene expression prediction) while maximizing the classification loss for the batch prediction, which encourages the model to learn batch-invariant features in the cell embeddings.
         self.reverse_grad = reverse_grad
 
     def forward(self, x: Tensor) -> Tensor:
@@ -1041,7 +1042,7 @@ class AdversarialDiscriminator(nn.Module):
             x: Tensor, shape [batch_size, embsize]
         """
         if self.reverse_grad:
-            x = grad_reverse(x, lambd=1.0)
+            x = grad_reverse(x, lambd=1.0) # apply gradient reversal to the input embeddings if reverse_grad is True. This is used during adversarial training to reverse the gradients for the batch prediction task, which encourages the model to learn features that are not predictive of the batch labels.
         for layer in self._decoder:
-            x = layer(x)
-        return self.out_layer(x)
+            x = layer(x) # run each layer in the discriminator sequentially, this cannot be done using sequential as we dont know how many sets of these layers we will need.
+        return self.out_layer(x) # after passing through the hidden layers, we apply the output layer to get the final class logits for the batch prediction. The output shape will be [batch_size, n_cls], which can then be used to compute the adversarial loss during training.
