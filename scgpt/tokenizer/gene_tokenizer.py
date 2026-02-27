@@ -439,6 +439,7 @@ def tokenize_and_pad_batch(
     return batch_padded
 
 
+#!!! This is how the masking is currently done
 def random_mask_value(
     values: Union[torch.Tensor, np.ndarray],
     mask_ratio: float = 0.15,
