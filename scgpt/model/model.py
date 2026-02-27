@@ -173,17 +173,18 @@ class TransformerModel(nn.Module):
         src_key_padding_mask: Tensor,
         batch_labels: Optional[Tensor] = None,  # (batch,)
     ) -> Tensor:
-        self._check_batch_labels(batch_labels)
+        self._check_batch_labels(batch_labels) # check the batch labels to ensure they are provided when required and not provided when not required.
 
-        src = self.encoder(src)  # (batch, seq_len, embsize)
+    # essentially encode each gene to a dense vector
+        src = self.encoder(src)  # (batch, seq_len, embsize) this calls the forward method of the GeneEncoder to get the token embeddings for the input gene tokens. The input src is a tensor of shape (batch_size, seq_len) containing the token ids for the genes, and the output is a tensor of shape (batch_size, seq_len, d_model) containing the corresponding token embeddings. We will use these token embeddings as the input to the transformer encoder. The gene encoder is defined above as GeneEncoder, which is a simple embedding layer that maps the input token ids to dense vectors of size d_model.
         self.cur_gene_token_embs = src
 
-        values = self.value_encoder(values)  # (batch, seq_len, embsize)
+        values = self.value_encoder(values)  # (batch, seq_len, embsize), encode the values to the same dimension as the token embeddings.
         if self.input_emb_style == "scaling":
             values = values.unsqueeze(2)
             total_embs = src * values
         else:
-            total_embs = src + values
+            total_embs = src + values # combine the token embeddings and value embeddings either by scaling (element-wise multiplication) or by addition, depending on the input_emb_style. The resulting total_embs will be the input to the transformer encoder, which will learn to integrate the information from both the gene tokens and their expression values.
 
         if getattr(self, "dsbn", None) is not None:
             batch_label = int(batch_labels[0].item())
@@ -344,14 +345,14 @@ class TransformerModel(nn.Module):
         Returns:
             dict of output Tensors.
         """
-        transformer_output = self._encode(
+        transformer_output = self._encode( # encodes the gene ids and values to get the input embeddings
             src, values, src_key_padding_mask, batch_labels
-        )
-        if self.use_batch_labels:
+        ) # (batch, seq_len, embsize), get the output from the transformer encoder. This will be used for the MLM objective and also for getting the cell embedding for the other objectives. 
+        if self.use_batch_labels: # encode the batch labels
             batch_emb = self.batch_encoder(batch_labels)  # (batch, embsize)
 
         output = {}
-        mlm_output = self.decoder(
+        mlm_output = self.decoder( # run the decoder on the transformer output possibly combined with the batch embeddings if relevant. Outputs the predicted gene expression values for each gene token, and if explicit_zero_prob is True, also outputs the predicted probability of zero values for each gene token.
             transformer_output
             if not self.use_batch_labels
             else torch.cat(
@@ -363,7 +364,7 @@ class TransformerModel(nn.Module):
             ),
             # else transformer_output + batch_emb.unsqueeze(1),
         )
-        if self.explicit_zero_prob and do_sample:
+        if self.explicit_zero_prob and do_sample: # set some of the predictions to zero based on predicted probabilities
             bernoulli = Bernoulli(probs=mlm_output["zero_probs"])
             output["mlm_output"] = bernoulli.sample() * mlm_output["pred"]
         else:
