@@ -372,7 +372,7 @@ class TransformerModel(nn.Module):
         if self.explicit_zero_prob:
             output["mlm_zero_probs"] = mlm_output["zero_probs"]
 
-        cell_emb = self._get_cell_emb_from_layer(transformer_output, values)
+        cell_emb = self._get_cell_emb_from_layer(transformer_output, values) # retreive the cell embeddings
         output["cell_emb"] = cell_emb
 
         if CLS:
