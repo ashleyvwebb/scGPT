@@ -11,7 +11,7 @@
 #SBATCH --output=joboutput_%j.out # Standard out from your job
 #SBATCH --error=joboutput_%j.err  # Standard error from your job
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)
+SCRIPT_DIR="/springbrook/share/bioing/csuxfw/GPT/scgpt/research/data/cellxgene"
 
 QUERY_PATH="path/to/query.txt"
 
