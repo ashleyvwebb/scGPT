@@ -36,7 +36,6 @@ def retrieve_soma_idx(query_name) -> List[str]:
         value_filter = VALUE_FILTER[query_name],
         column_names = ["soma_joinid"]
     )
-    print(cell_metadata.shape)
     cell_metadata = cell_metadata.concat()
     cell_metadata = cell_metadata.to_pandas()
     return cell_metadata["soma_joinid"].to_list()
