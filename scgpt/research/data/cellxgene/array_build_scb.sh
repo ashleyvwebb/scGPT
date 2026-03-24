@@ -11,7 +11,7 @@
 #SBATCH --output=joboutput_%j.out # Standard out from your job
 #SBATCH --error=joboutput_%j.err  # Standard error from your job
 
-SCRIPT_DIR="/springbrook/share/bioinf/csuxfw/GPT/scgpt/research/data/cellxgene"
+SCRIPT_DIR="/springbrook/share/bioinf/csuxfw/scGPT/scgpt/research/data/cellxgene"
 
 QUERY_PATH="path/to/query.txt"
 
