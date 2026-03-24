@@ -4,7 +4,7 @@ QUERY_LIST_PATH = "./query_list.txt"
 with open(QUERY_LIST_PATH) as f:
     QUERY_LIST = [line.rstrip('\n') for line in f]
 
-VERSION = "2023-05-08"
+VERSION = "2025-11-08"
 
 VALUE_FILTER = {}
 
