@@ -16,8 +16,6 @@ INDEX_PATH="${SCRIPT_DIR}/index"
 QUERY_PATH="${SCRIPT_DIR}/query_list.txt"
 DATA_PATH="${SCRIPT_DIR}/h5ad"
 
-mkdir -p $OUTPUT_PATH
-
 query_name=$(sed -n "${SLURM_ARRAY_TASK_ID}p" $QUERY_PATH)
 
 echo "downloading ${query_name}"
