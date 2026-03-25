@@ -154,3 +154,5 @@ examples/save
 examples/modality_pred/data
 figures/
 *.idx
+*.parquet
+scb/

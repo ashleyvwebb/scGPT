@@ -4,7 +4,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=4591
-#SBATCH --time=24:00:00
+#SBATCH --time=1:00:00
 #SBATCH --array=1-4
 #SBATCH --mail-type=END,FAIL,TIME_LIMIT_80,ARRAY_TASKS # Events to send email on, remove if you don't want this
 #SBATCH --mail-user=ashley.webb@warwick.ac.uk
@@ -20,7 +20,7 @@ echo ${query_name}
 
 DATA_PATH="${SCRIPT_DIR}/h5ad"
 OUTPUT_PATH="${SCRIPT_DIR}/scb"
-VOCAB_PATH="${SCRIPT_DIR}/../../../tokenizer/default_census_vocab.json"
+VOCAB_PATH="${SCRIPT_DIR}/../../../tokenizer/default_gene_vocab.json"
 
 echo "processing ${query_name}"
 N=25000
@@ -31,7 +31,7 @@ mkdir -p $OUTPUT_PATH
 echo "downloading to ${OUTPUT_PATH}"
 
 python build_large_scale_data.py \
-    --input-dir ${DATA_PATH} \
-    --output-dir ${OUTPUT_PATH} \
+    --input-dir "${DATA_PATH}/${query_name}" \
+    --output-dir "${OUTPUT_PATH}/${query_name}" \
     --vocab-file ${VOCAB_PATH} \
     --N ${N}
