@@ -4,7 +4,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=4591
-#SBATCH --time=6:00:00
+#SBATCH --time=24:00:00
 #SBATCH --array=1-4
 #SBATCH --mail-type=END,FAIL,TIME_LIMIT_80,ARRAY_TASKS # Events to send email on, remove if you don't want this
 #SBATCH --mail-user=ashley.webb@warwick.ac.uk
@@ -13,13 +13,13 @@
 
 SCRIPT_DIR="/springbrook/share/bioinf/csuxfw/scGPT/scgpt/research/data/cellxgene"
 
-QUERY_PATH="path/to/query.txt"
+QUERY_PATH="query_list.txt"
 
 query_name=$(sed -n "${SLURM_ARRAY_TASK_ID}p" $QUERY_PATH)
 
 DATA_PATH="${SCRIPT_DIR}/h5ad"
 OUTPUT_PATH="${SCRIPT_DIR}/scb"
-VOCAB_PATH="${SCRIPT_DIR}/../../tokenizer/default_census_vocab.json"
+VOCAB_PATH="${SCRIPT_DIR}/../../../tokenizer/default_census_vocab.json"
 
 echo "processing ${query_name}"
 N=25000
