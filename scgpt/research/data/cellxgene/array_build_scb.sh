@@ -16,6 +16,7 @@ SCRIPT_DIR="/springbrook/share/bioinf/csuxfw/scGPT/scgpt/research/data/cellxgene
 QUERY_PATH="query_list.txt"
 
 query_name=$(sed -n "${SLURM_ARRAY_TASK_ID}p" $QUERY_PATH)
+echo ${query_name}
 
 DATA_PATH="${SCRIPT_DIR}/h5ad"
 OUTPUT_PATH="${SCRIPT_DIR}/scb"
