@@ -32,3 +32,7 @@ def get_all_counts_path(scb_root: str | Path, query_name: str) -> Path:
     # returns {scb_root}/{query_name}/all_counts
     # these are the processed parquet locations created by build_large_scale_data.py
     return Path(scb_root) / query_name / "all_counts"
+
+files = list_query_partitions("springbrook/share/bioinf/csuxfw/scGPT/scgpt/research/data/cellxgene/h5ad", "blood-cancer")
+adata = load_h5ad(files[0])
+print(adata.shape)
