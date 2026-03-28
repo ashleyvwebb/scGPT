@@ -103,41 +103,41 @@ def inspect_query(
 
 def print_result(result: dict) -> None:
     print("=" * 80)
-    print(f"QUERY: {result["query"]}")
-    print(f"FILES FOUND: {result["n_files_found"]}")
+    print(f"QUERY: {result['query']}")
+    print(f"FILES FOUND: {result['n_files_found']}")
 
     if "error" in result:
-        print(f"ERROR: {result["error"]}")
+        print(f"ERROR: {result['error']}")
         return
     
     for file_info in result["files"]:
         print("-" * 80)
-        print(f"FILE: {file_info["file"]}")
+        print(f"FILE: {file_info['file']}")
 
         if "error" in file_info:
-            print(f"ERROR: {file_info["error"]}")
+            print(f"ERROR: {file_info['error']}")
             continue
 
         summary = file_info["summary"]
         vocab_overlap = file_info["vocab_overlap"]
         cancer_overlap = file_info["cancer_gene_overlap"]
 
-        print(f"Shape: ({summary["n_cells"]}, {summary["n_genes"]})")
-        print(f"obs columns ({len(summary["obs_columns"])}): {summary["obs_columns"][:10]}")
-        print(f"var columns ({len(summary["var_columns"])}): {summary["var_columns"][:10]}")
+        print(f"Shape: ({summary['n_cells']}, {summary['n_genes']})")
+        print(f"obs columns ({len(summary['obs_columns'])}): {summary['obs_columns'][:10]}")
+        print(f"var columns ({len(summary['var_columns'])}): {summary['var_columns'][:10]}")
         print(
             "Vocab overlap: "
-            f"{vocab_overlap["n_overlap"]}/{vocab_overlap["n_genes"]} "
-            f"({vocab_overlap["overlap_fraction"]:.3f})"
+            f"{vocab_overlap['n_overlap']}/{vocab_overlap['n_genes']} "
+            f"({vocab_overlap['overlap_fraction']:.3f})"
         )
         print(
             "Cancer gene overlap: "
-            f"{vocab_overlap["n_overlap"]}/{vocab_overlap["n_genes"]} "
-            f"({vocab_overlap["overlap_fraction"]:.3f})"
+            f"{vocab_overlap['n_overlap']}/{vocab_overlap['n_genes']} "
+            f"({vocab_overlap['overlap_fraction']:.3f})"
         )
         print(
             "Cancer genes present sample: "
-            f"{cancer_overlap["present_genes_sample"]}"
+            f"{cancer_overlap['present_genes_sample']}"
         )
 
 def parse_args():
