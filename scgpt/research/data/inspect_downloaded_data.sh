@@ -12,6 +12,6 @@ python inspect_downloaded_data.py \
     --h5ad-root "/springbrook/share/bioinf/csuxfw/scGPT/scgpt/research/data/cellxgene/h5ad" \
     --vocab-path "/springbrook/share/bioinf/csuxfw/scGPT/scgpt/tokenizer/default_gene_vocab.json" \
     --cancer-gene-path "/springbrook/share/bioinf/csuxfw/scGPT/scgpt/research/data/cancer_genes/cancer_gene_list.txt" \
-    --queries "blood+lung+blood-cancer+lung-cancer" \
+    --queries "blood" "lung" "blood-cancer" "lung-cancer" \
     --max-files 1 \
     --subset-n-cells 1
