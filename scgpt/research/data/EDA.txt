@@ -1,0 +1,56 @@
+/springbrook/share/bioinf/csuxfw/miniconda3/envs/scgpt/lib/python3.11/site-packages/scgpt/model/model.py:21: UserWarning: flash_attn is not installed
+  warnings.warn("flash_attn is not installed")
+/springbrook/share/bioinf/csuxfw/miniconda3/envs/scgpt/lib/python3.11/site-packages/scgpt/model/multiomic_model.py:19: UserWarning: flash_attn is not installed
+  warnings.warn("flash_attn is not installed")
+/springbrook/share/bioinf/csuxfw/miniconda3/envs/scgpt/lib/python3.11/site-packages/torchtext/vocab/__init__.py:4: UserWarning: 
+/!\ IMPORTANT WARNING ABOUT TORCHTEXT STATUS /!\ 
+Torchtext is deprecated and the last released version will be 0.18 (this one). You can silence this warning by calling the following at the beginnign of your scripts: `import torchtext; torchtext.disable_torchtext_deprecation_warning()`
+  warnings.warn(torchtext._TORCHTEXT_DEPRECATION_MSG)
+/springbrook/share/bioinf/csuxfw/miniconda3/envs/scgpt/lib/python3.11/site-packages/torchtext/utils.py:4: UserWarning: 
+/!\ IMPORTANT WARNING ABOUT TORCHTEXT STATUS /!\ 
+Torchtext is deprecated and the last released version will be 0.18 (this one). You can silence this warning by calling the following at the beginnign of your scripts: `import torchtext; torchtext.disable_torchtext_deprecation_warning()`
+  warnings.warn(torchtext._TORCHTEXT_DEPRECATION_MSG)
+================================================================================
+QUERY: blood
+FILES FOUND: 717
+--------------------------------------------------------------------------------
+FILE: /springbrook/share/bioinf/csuxfw/scGPT/scgpt/research/data/cellxgene/h5ad/blood/partition_0.h5ad
+Shape: (1, 61497)
+obs columns (28): ['soma_joinid', 'dataset_id', 'assay', 'assay_ontology_term_id', 'cell_type', 'cell_type_ontology_term_id', 'development_stage', 'development_stage_ontology_term_id', 'disease', 'disease_ontology_term_id']
+var columns (7): ['soma_joinid', 'feature_id', 'feature_name', 'feature_type', 'feature_length', 'nnz', 'n_measured_obs']
+Vocab overlap: 40103/60028 (0.668)
+Cancer gene overlap: 578/590 (0.980)
+Cancer genes present sample: ['ABI1', 'ABL1', 'ABL2', 'ACKR3', 'ACSL3', 'ACVR1', 'ACVR1B', 'ACVR2A', 'AFDN', 'AFF1', 'AFF3', 'AFF4', 'AKT1', 'AKT2', 'ALK', 'AMER1', 'APC', 'AR', 'ARHGAP26', 'ARHGAP35']
+================================================================================
+QUERY: lung
+FILES FOUND: 248
+--------------------------------------------------------------------------------
+FILE: /springbrook/share/bioinf/csuxfw/scGPT/scgpt/research/data/cellxgene/h5ad/lung/partition_0.h5ad
+Shape: (1, 61497)
+obs columns (28): ['soma_joinid', 'dataset_id', 'assay', 'assay_ontology_term_id', 'cell_type', 'cell_type_ontology_term_id', 'development_stage', 'development_stage_ontology_term_id', 'disease', 'disease_ontology_term_id']
+var columns (7): ['soma_joinid', 'feature_id', 'feature_name', 'feature_type', 'feature_length', 'nnz', 'n_measured_obs']
+Vocab overlap: 40103/60028 (0.668)
+Cancer gene overlap: 578/590 (0.980)
+Cancer genes present sample: ['ABI1', 'ABL1', 'ABL2', 'ACKR3', 'ACSL3', 'ACVR1', 'ACVR1B', 'ACVR2A', 'AFDN', 'AFF1', 'AFF3', 'AFF4', 'AKT1', 'AKT2', 'ALK', 'AMER1', 'APC', 'AR', 'ARHGAP26', 'ARHGAP35']
+================================================================================
+QUERY: blood-cancer
+FILES FOUND: 2
+--------------------------------------------------------------------------------
+FILE: /springbrook/share/bioinf/csuxfw/scGPT/scgpt/research/data/cellxgene/h5ad/blood-cancer/partition_0.h5ad
+Shape: (1, 61497)
+obs columns (28): ['soma_joinid', 'dataset_id', 'assay', 'assay_ontology_term_id', 'cell_type', 'cell_type_ontology_term_id', 'development_stage', 'development_stage_ontology_term_id', 'disease', 'disease_ontology_term_id']
+var columns (7): ['soma_joinid', 'feature_id', 'feature_name', 'feature_type', 'feature_length', 'nnz', 'n_measured_obs']
+Vocab overlap: 40103/60028 (0.668)
+Cancer gene overlap: 578/590 (0.980)
+Cancer genes present sample: ['ABI1', 'ABL1', 'ABL2', 'ACKR3', 'ACSL3', 'ACVR1', 'ACVR1B', 'ACVR2A', 'AFDN', 'AFF1', 'AFF3', 'AFF4', 'AKT1', 'AKT2', 'ALK', 'AMER1', 'APC', 'AR', 'ARHGAP26', 'ARHGAP35']
+================================================================================
+QUERY: lung-cancer
+FILES FOUND: 75
+--------------------------------------------------------------------------------
+FILE: /springbrook/share/bioinf/csuxfw/scGPT/scgpt/research/data/cellxgene/h5ad/lung-cancer/partition_0.h5ad
+Shape: (1, 61497)
+obs columns (28): ['soma_joinid', 'dataset_id', 'assay', 'assay_ontology_term_id', 'cell_type', 'cell_type_ontology_term_id', 'development_stage', 'development_stage_ontology_term_id', 'disease', 'disease_ontology_term_id']
+var columns (7): ['soma_joinid', 'feature_id', 'feature_name', 'feature_type', 'feature_length', 'nnz', 'n_measured_obs']
+Vocab overlap: 40103/60028 (0.668)
+Cancer gene overlap: 578/590 (0.980)
+Cancer genes present sample: ['ABI1', 'ABL1', 'ABL2', 'ACKR3', 'ACSL3', 'ACVR1', 'ACVR1B', 'ACVR2A', 'AFDN', 'AFF1', 'AFF3', 'AFF4', 'AKT1', 'AKT2', 'ALK', 'AMER1', 'APC', 'AR', 'ARHGAP26', 'ARHGAP35']
