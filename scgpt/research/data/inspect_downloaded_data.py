@@ -6,13 +6,13 @@ import json
 
 from scgpt.tokenizer import GeneVocab
 
-from research.data.cxg_loader import (
+from cxg_loader import (
     list_query_partitions,
     load_h5ad,
     subset_cells
 )
 
-from research.data.alignment import (
+from alignment import (
     get_gene_names,
     compute_vocab_overlap,
     compute_cancer_gene_overlap
