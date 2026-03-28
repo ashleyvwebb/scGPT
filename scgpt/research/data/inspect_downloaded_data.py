@@ -132,8 +132,8 @@ def print_result(result: dict) -> None:
         )
         print(
             "Cancer gene overlap: "
-            f"{vocab_overlap['n_overlap']}/{vocab_overlap['n_genes']} "
-            f"({vocab_overlap['overlap_fraction']:.3f})"
+            f"{vocab_overlap['n_present']}/{vocab_overlap['n_cancer_genes']} "
+            f"({vocab_overlap['n_present']/vocab_overlap['n_cancer_genes']:.3f})"
         )
         print(
             "Cancer genes present sample: "
