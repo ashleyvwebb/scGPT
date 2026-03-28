@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 #SBATCH --job-name=EDA
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
