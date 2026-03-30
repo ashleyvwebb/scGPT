@@ -7,7 +7,7 @@ import json
 from scgpt.tokenizer import GeneVocab
 
 from cxg_loader import (
-    list_query_partitions,
+    get_query_partition_files,
     load_h5ad,
     subset_cells
 )
@@ -45,7 +45,7 @@ def inspect_query(
         max_files: int,
         subset_n_cells: int | None,
 ) -> dict:
-    files = list_query_partitions(h5ad_root, query_name)
+    files = get_query_partition_files(h5ad_root, query_name, max_files)
 
     result = {
         "query": query_name,
@@ -57,16 +57,14 @@ def inspect_query(
         result["error"] = "No .h5ad files found for this query."
         return result
     
-    files = files[:max_files]
-
-    for file_path in files:
+    for i, file_path in enumerate(files):
         file_info: dict = {"file": str(file_path)}
 
         try:
             adata = load_h5ad(file_path)
 
             if subset_n_cells is not None:
-                adata = subset_cells(adata, subset_n_cells, seed=0)
+                adata = subset_cells(adata, subset_n_cells, seed=i)
 
             basic = summarise_adata(adata)
             gene_names = get_gene_names(adata)
@@ -83,8 +81,9 @@ def inspect_query(
             }
             file_info["cancer_gene_overlap"] = {
                 "n_cancer_genes": cancer_overlap["n_cancer_genes"],
-                "n_present": cancer_overlap["n_present"],
-                "present_genes_sample": sorted(list(cancer_overlap["present_genes"]))[:20],
+                "n_overlap": cancer_overlap["n_overlap"],
+                "overlap_fraction": cancer_overlap["overlap_fraction"],
+                "overlap_genes": sorted(list(cancer_overlap["overlap_genes"]))[:20],
             }
 
             file_info["obs_head_columns"] = {
@@ -132,12 +131,12 @@ def print_result(result: dict) -> None:
         )
         print(
             "Cancer gene overlap: "
-            f"{cancer_overlap['n_present']}/{cancer_overlap['n_cancer_genes']} "
-            f"({cancer_overlap['n_present']/cancer_overlap['n_cancer_genes']:.3f})"
+            f"{cancer_overlap['n_overlap']}/{cancer_overlap['n_cancer_genes']} "
+            f"({cancer_overlap['overlap_fraction']:.3f})"
         )
         print(
             "Cancer genes present sample: "
-            f"{cancer_overlap['present_genes_sample']}"
+            f"{cancer_overlap['overlap_genes']}"
         )
 
 def parse_args():

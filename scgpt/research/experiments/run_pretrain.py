@@ -27,17 +27,22 @@ import argparse
 import json
 import random
 
+import anndata as ad
 import numpy as np
 import torch
 
 import sys
 sys.path.append("../")
 
-from data.cxg_loader import get_all_counts_path
+from data.cxg_loader import (
+    get_query_partition_files,
+    load_query_partitions,
+    subset_cells,
+)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Baseline scGPT pretraining run")
-    parser.add_argument("--scb-root", type=Path, required=True)
+    parser.add_argument("--h5ad-root", type=Path, required=True)
     parser.add_argument("--query", type=str, default="lung-cancer")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--epochs", type=int, default=1)
