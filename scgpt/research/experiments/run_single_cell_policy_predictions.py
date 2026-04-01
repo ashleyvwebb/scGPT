@@ -149,7 +149,7 @@ def main():
     # one cell
     cell_values = np.asarray(adata.X[args.cell_index]).reshape(-1)
     print("Cell values:", cell_values)
-    print(cell_values.toarray())
+    print(cell_values[0].toarray())
     print()
 
     gene_ids = np.array(
