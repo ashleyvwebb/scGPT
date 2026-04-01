@@ -197,8 +197,7 @@ class TransformerModel(nn.Module):
         output = self.transformer_encoder(
             total_embs, src_key_padding_mask=src_key_padding_mask
         )
-        print("IN ENCODE") 
-    #     return output  # (batch, seq_len, embsize)
+        return output  # (batch, seq_len, embsize)
 
     def _get_cell_emb_from_layer(
         self, layer_output: Tensor, weights: Tensor = None
@@ -349,100 +348,100 @@ class TransformerModel(nn.Module):
         transformer_output = self._encode( # encodes the gene ids and values to get the input embeddings
             src, values, src_key_padding_mask, batch_labels
         ) # (batch, seq_len, embsize), get the output from the transformer encoder. This will be used for the MLM objective and also for getting the cell embedding for the other objectives. 
-        print("REACHED FORWARD")
-        # if self.use_batch_labels: # encode the batch labels
-        #     batch_emb = self.batch_encoder(batch_labels)  # (batch, embsize)
 
-        # output = {}
-        # mlm_output = self.decoder( # run the decoder on the transformer output possibly combined with the batch embeddings if relevant. Outputs the predicted gene expression values for each gene token, and if explicit_zero_prob is True, also outputs the predicted probability of zero values for each gene token.
-        #     transformer_output
-        #     if not self.use_batch_labels
-        #     else torch.cat(
-        #         [
-        #             transformer_output,
-        #             batch_emb.unsqueeze(1).repeat(1, transformer_output.shape[1], 1),
-        #         ],
-        #         dim=2,
-        #     ),
-        #     # else transformer_output + batch_emb.unsqueeze(1),
-        # )
-        # if self.explicit_zero_prob and do_sample: # set some of the predictions to zero based on predicted probabilities
-        #     bernoulli = Bernoulli(probs=mlm_output["zero_probs"])
-        #     output["mlm_output"] = bernoulli.sample() * mlm_output["pred"]
-        # else:
-        #     output["mlm_output"] = mlm_output["pred"]  # (batch, seq_len)
-        # if self.explicit_zero_prob:
-        #     output["mlm_zero_probs"] = mlm_output["zero_probs"]
+        if self.use_batch_labels: # encode the batch labels
+            batch_emb = self.batch_encoder(batch_labels)  # (batch, embsize)
 
-        # cell_emb = self._get_cell_emb_from_layer(transformer_output, values) # retreive the cell embeddings
-        # output["cell_emb"] = cell_emb
+        output = {}
+        mlm_output = self.decoder( # run the decoder on the transformer output possibly combined with the batch embeddings if relevant. Outputs the predicted gene expression values for each gene token, and if explicit_zero_prob is True, also outputs the predicted probability of zero values for each gene token.
+            transformer_output
+            if not self.use_batch_labels
+            else torch.cat(
+                [
+                    transformer_output,
+                    batch_emb.unsqueeze(1).repeat(1, transformer_output.shape[1], 1),
+                ],
+                dim=2,
+            ),
+            # else transformer_output + batch_emb.unsqueeze(1),
+        )
+        if self.explicit_zero_prob and do_sample: # set some of the predictions to zero based on predicted probabilities
+            bernoulli = Bernoulli(probs=mlm_output["zero_probs"])
+            output["mlm_output"] = bernoulli.sample() * mlm_output["pred"]
+        else:
+            output["mlm_output"] = mlm_output["pred"]  # (batch, seq_len)
+        if self.explicit_zero_prob:
+            output["mlm_zero_probs"] = mlm_output["zero_probs"]
 
-        # if CLS:
-        #     output["cls_output"] = self.cls_decoder(cell_emb)  # (batch, n_cls)
-        # if CCE:
-        #     cell1 = cell_emb
-        #     transformer_output2 = self._encode(
-        #         src, values, src_key_padding_mask, batch_labels
-        #     )
-        #     cell2 = self._get_cell_emb_from_layer(transformer_output2)
+        cell_emb = self._get_cell_emb_from_layer(transformer_output, values) # retreive the cell embeddings
+        output["cell_emb"] = cell_emb
 
-        #     # Gather embeddings from all devices if distributed training
-        #     if dist.is_initialized() and self.training:
-        #         cls1_list = [
-        #             torch.zeros_like(cell1) for _ in range(dist.get_world_size())
-        #         ]
-        #         cls2_list = [
-        #             torch.zeros_like(cell2) for _ in range(dist.get_world_size())
-        #         ]
-        #         dist.all_gather(tensor_list=cls1_list, tensor=cell1.contiguous())
-        #         dist.all_gather(tensor_list=cls2_list, tensor=cell2.contiguous())
+        if CLS:
+            output["cls_output"] = self.cls_decoder(cell_emb)  # (batch, n_cls)
+        if CCE:
+            cell1 = cell_emb
+            transformer_output2 = self._encode(
+                src, values, src_key_padding_mask, batch_labels
+            )
+            cell2 = self._get_cell_emb_from_layer(transformer_output2)
 
-        #         # NOTE: all_gather results have no gradients, so replace the item
-        #         # of the current rank with the original tensor to keep gradients.
-        #         # See https://github.com/princeton-nlp/SimCSE/blob/main/simcse/models.py#L186
-        #         cls1_list[dist.get_rank()] = cell1
-        #         cls2_list[dist.get_rank()] = cell2
+            # Gather embeddings from all devices if distributed training
+            if dist.is_initialized() and self.training:
+                cls1_list = [
+                    torch.zeros_like(cell1) for _ in range(dist.get_world_size())
+                ]
+                cls2_list = [
+                    torch.zeros_like(cell2) for _ in range(dist.get_world_size())
+                ]
+                dist.all_gather(tensor_list=cls1_list, tensor=cell1.contiguous())
+                dist.all_gather(tensor_list=cls2_list, tensor=cell2.contiguous())
 
-        #         cell1 = torch.cat(cls1_list, dim=0)
-        #         cell2 = torch.cat(cls2_list, dim=0)
-        #     # TODO: should detach the second run cls2? Can have a try
-        #     cos_sim = self.sim(cell1.unsqueeze(1), cell2.unsqueeze(0))  # (batch, batch)
-        #     labels = torch.arange(cos_sim.size(0)).long().to(cell1.device)
-        #     output["loss_cce"] = self.creterion_cce(cos_sim, labels)
-        # if MVC:
-        #     mvc_output = self.mvc_decoder(
-        #         cell_emb
-        #         if not self.use_batch_labels
-        #         else torch.cat([cell_emb, batch_emb], dim=1),
-        #         # else cell_emb + batch_emb,
-        #         self.cur_gene_token_embs,
-        #     )
-        #     if self.explicit_zero_prob and do_sample:
-        #         bernoulli = Bernoulli(probs=mvc_output["zero_probs"])
-        #         output["mvc_output"] = bernoulli.sample() * mvc_output["pred"]
-        #     else:
-        #         output["mvc_output"] = mvc_output["pred"]  # (batch, seq_len)
-        #     if self.explicit_zero_prob:
-        #         output["mvc_zero_probs"] = mvc_output["zero_probs"]
-        # if ECS:
-        #     # Here using customized cosine similarity instead of F.cosine_similarity
-        #     # to avoid the pytorch issue of similarity larger than 1.0, pytorch # 78064
-        #     # normalize the embedding
-        #     cell_emb_normed = F.normalize(cell_emb, p=2, dim=1)
-        #     cos_sim = torch.mm(cell_emb_normed, cell_emb_normed.t())  # (batch, batch)
+                # NOTE: all_gather results have no gradients, so replace the item
+                # of the current rank with the original tensor to keep gradients.
+                # See https://github.com/princeton-nlp/SimCSE/blob/main/simcse/models.py#L186
+                cls1_list[dist.get_rank()] = cell1
+                cls2_list[dist.get_rank()] = cell2
 
-        #     # mask out diagnal elements
-        #     mask = torch.eye(cos_sim.size(0)).bool().to(cos_sim.device)
-        #     cos_sim = cos_sim.masked_fill(mask, 0.0)
-        #     # only optimize positive similarities
-        #     cos_sim = F.relu(cos_sim)
+                cell1 = torch.cat(cls1_list, dim=0)
+                cell2 = torch.cat(cls2_list, dim=0)
+            # TODO: should detach the second run cls2? Can have a try
+            cos_sim = self.sim(cell1.unsqueeze(1), cell2.unsqueeze(0))  # (batch, batch)
+            labels = torch.arange(cos_sim.size(0)).long().to(cell1.device)
+            output["loss_cce"] = self.creterion_cce(cos_sim, labels)
+        if MVC:
+            mvc_output = self.mvc_decoder(
+                cell_emb
+                if not self.use_batch_labels
+                else torch.cat([cell_emb, batch_emb], dim=1),
+                # else cell_emb + batch_emb,
+                self.cur_gene_token_embs,
+            )
+            if self.explicit_zero_prob and do_sample:
+                bernoulli = Bernoulli(probs=mvc_output["zero_probs"])
+                output["mvc_output"] = bernoulli.sample() * mvc_output["pred"]
+            else:
+                output["mvc_output"] = mvc_output["pred"]  # (batch, seq_len)
+            if self.explicit_zero_prob:
+                output["mvc_zero_probs"] = mvc_output["zero_probs"]
+        if ECS:
+            # Here using customized cosine similarity instead of F.cosine_similarity
+            # to avoid the pytorch issue of similarity larger than 1.0, pytorch # 78064
+            # normalize the embedding
+            cell_emb_normed = F.normalize(cell_emb, p=2, dim=1)
+            cos_sim = torch.mm(cell_emb_normed, cell_emb_normed.t())  # (batch, batch)
 
-        #     output["loss_ecs"] = torch.mean(1 - (cos_sim - self.ecs_threshold) ** 2)
+            # mask out diagnal elements
+            mask = torch.eye(cos_sim.size(0)).bool().to(cos_sim.device)
+            cos_sim = cos_sim.masked_fill(mask, 0.0)
+            # only optimize positive similarities
+            cos_sim = F.relu(cos_sim)
 
-        # if self.do_dab:
-        #     output["dab_output"] = self.grad_reverse_discriminator(cell_emb)
+            output["loss_ecs"] = torch.mean(1 - (cos_sim - self.ecs_threshold) ** 2)
 
-        # return output
+        if self.do_dab:
+            output["dab_output"] = self.grad_reverse_discriminator(cell_emb)
+
+        return output
 
     def encode_batch(
         self,
