@@ -66,11 +66,9 @@ def apply_mask_to_values(
 
 def build_valid_mask(values: np.ndarray, pad_value: int | float | None = None) -> np.ndarray:
     values = np.asarray(values)
+    values = values[0]
     if pad_value is None:
         return np.ones_like(values, dtype=bool)
-    pad_values = np.full_like(values.shape, pad_value)
     print(values.shape)
-    print(pad_values.shape)
     print(values)
-    print(pad_values)
-    return np.not_equal(values, pad_values)
+    return values != pad_value
