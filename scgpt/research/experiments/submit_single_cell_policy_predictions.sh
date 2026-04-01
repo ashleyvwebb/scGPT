@@ -1,12 +1,9 @@
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --partition=gpu
-#SBATCH --gres=gpu:lovelace_l40:1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem-per-cpu=5960
-#SBATCH --time=00:20:00
-
+#SBATCH --cpus-per-task=2
+#SBATCH --mem-per-cpu=4591
+#SBATCH --time=01:00:00
 
 set -euo pipefail
 
@@ -38,4 +35,4 @@ python -m scgpt.research.experiments.run_all_single_cell_policy_predictions \
   --mask-token-value "${MASK_TOKEN_VALUE}" \
   --pad-value "${PAD_VALUE}" \
   --cell-index 0 \
-  --device "cuda"
+  --device cpu
