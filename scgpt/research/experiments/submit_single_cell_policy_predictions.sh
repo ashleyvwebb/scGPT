@@ -35,5 +35,4 @@ python -m research.experiments.run_all_single_cell_policy_predictions \
   --mask-ratio "${MASK_RATIO}" \
   --mask-token-value "${MASK_TOKEN_VALUE}" \
   --pad-value "${PAD_VALUE}" \
-  --cell-index "${SLURM_ARRAY_TASK_ID}" \
   --device cpu
