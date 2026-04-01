@@ -61,13 +61,13 @@ def main():
         return
 
     print("At line 61")
-    # n_cells = get_n_cells(
-    #     h5ad_root=args.h5ad_root,
-    #     query=args.query,
-    #     max_files=args.max_files,
-    #     subset_n_cells=args.subset_n_cells,
-    # )
-    # print("At line 68")
+    n_cells = get_n_cells(
+        h5ad_root=args.h5ad_root,
+        query=args.query,
+        max_files=args.max_files,
+        subset_n_cells=args.subset_n_cells,
+    )
+    print("At line 68")
 
     # if args.max_total_cells is not None:
     #     n_cells = min(n_cells, args.max_total_cells)
