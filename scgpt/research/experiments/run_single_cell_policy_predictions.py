@@ -147,20 +147,16 @@ def main():
     gene_names = get_gene_names(adata)
 
     # one cell
-    print(adata)
-    print(adata.X)
-    print(adata.X[args.cell_index])
     cell_values = np.asarray(adata.X[args.cell_index]).reshape(-1)
-    print("Cell values:", cell_values)
-    print(cell_values[0])
-    print()
 
     gene_ids = np.array(
         [vocab[g] if g in vocab else vocab["<pad>"] for g in gene_names],
         dtype=int,
     )
 
-    valid_mask = build_valid_mask(cell_values, pad_value=args.pad_value)
+    print("pad value", vocab["<pad>"])
+
+    valid_mask = build_valid_mask(gene_ids, pad_token_id=vocab["<pad>"])
     policies = build_policies(cancer_gene_set)
 
     for policy in policies:
