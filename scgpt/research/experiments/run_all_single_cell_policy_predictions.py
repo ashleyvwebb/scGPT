@@ -69,9 +69,9 @@ def main():
     )
     print("At line 68")
 
-    # if args.max_total_cells is not None:
-    #     n_cells = min(n_cells, args.max_total_cells)
-    # print("At line 72")
+    if args.max_total_cells is not None:
+        n_cells = min(n_cells, args.max_total_cells)
+    print("At line 72")
 
     # print(f"Running prediction jobs locally for {n_cells} cells")
 
