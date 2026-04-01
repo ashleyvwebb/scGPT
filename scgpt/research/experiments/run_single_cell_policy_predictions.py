@@ -22,6 +22,10 @@ from research.experiments.common_prediction import (
 )
 from research.experiments.plot_prediction_results import plot_single_cell_predictions
 
+from tokenizer.gene_tokenizer import GeneVocab
+from model import TransformerModel
+from utils import load_pretrained
+
 
 # def parse_args():
 #     p = argparse.ArgumentParser()
@@ -54,13 +58,6 @@ def build_policies(cancer_gene_set: set[str]):
 
 
 def load_model(model_dir: str, device):
-    from pathlib import Path
-    import json
-    import torch
-    from scgpt.tokenizer.gene_tokenizer import GeneVocab
-    from scgpt.model import TransformerModel
-    from scgpt.utils import load_pretrained
-
     model_dir = Path(model_dir)
     vocab_file = model_dir / "vocab.json"
     model_config_file = model_dir / "args.json"
