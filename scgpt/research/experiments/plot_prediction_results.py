@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 
-from research.experiments.common_prediction import SingleCellPredictionResult, masked_pearsonr
+from scgpt.research.experiments.common_prediction import SingleCellPredictionResult, masked_pearsonr
 
 
 def plot_single_cell_predictions(
