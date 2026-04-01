@@ -167,12 +167,9 @@ def run_one_cell(
 
     valid_mask = build_valid_mask(gene_ids, pad_token_id=vocab["<pad>"])
     policies = build_policies(cancer_gene_set)
-    print("GOT TO HERE")
 
     for policy in policies:
-        print(policy.name)
         rng = np.random.default_rng(0)
-        print("1")
         masking = policy.sample_mask(
             gene_names=gene_names,
             values=cell_values,
@@ -180,22 +177,24 @@ def run_one_cell(
             rng=rng,
             valid_mask=valid_mask,
         )
-        print("2")
 
         masked_values = apply_mask_to_values(
             values=cell_values,
             mask=masking.mask,
             mask_token_value=mask_token_value,
         )
-        print("3")
 
-    #     pred_values = run_model_forward_stub(
-    #         model=model,
-    #         gene_ids=gene_ids,
-    #         masked_values=masked_values,
-    #         device=device,
-    #         pad_token_id=vocab["<pad>"],
-    #     )
+        print(1)
+
+        pred_values = run_model_forward_stub(
+            model=model,
+            gene_ids=gene_ids,
+            masked_values=masked_values,
+            device=device,
+            pad_token_id=vocab["<pad>"],
+        )
+
+        print(2)
 
     #     result = SingleCellPredictionResult(
     #         gene_names=list(gene_names),
