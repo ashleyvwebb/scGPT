@@ -169,21 +169,25 @@ def run_one_cell(
     policies = build_policies(cancer_gene_set)
     print("GOT TO HERE")
 
-    # for policy in policies:
-    #     rng = np.random.default_rng(0)
-    #     masking = policy.sample_mask(
-    #         gene_names=gene_names,
-    #         values=cell_values,
-    #         mask_ratio=mask_ratio,
-    #         rng=rng,
-    #         valid_mask=valid_mask,
-    #     )
+    for policy in policies:
+        print(policy.name)
+        rng = np.random.default_rng(0)
+        print("1")
+        masking = policy.sample_mask(
+            gene_names=gene_names,
+            values=cell_values,
+            mask_ratio=mask_ratio,
+            rng=rng,
+            valid_mask=valid_mask,
+        )
+        print("2")
 
-    #     masked_values = apply_mask_to_values(
-    #         values=cell_values,
-    #         mask=masking.mask,
-    #         mask_token_value=mask_token_value,
-    #     )
+        masked_values = apply_mask_to_values(
+            values=cell_values,
+            mask=masking.mask,
+            mask_token_value=mask_token_value,
+        )
+        print("3")
 
     #     pred_values = run_model_forward_stub(
     #         model=model,
