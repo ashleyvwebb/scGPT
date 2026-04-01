@@ -53,31 +53,31 @@ def get_n_cells(h5ad_root: Path, query: str, max_files: int, subset_n_cells: int
 def main():
     args = parse_args()
     print("HERE")
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    print("NOW HERE")
+    # args.output_dir.mkdir(parents=True, exist_ok=True)
+    # print("NOW HERE")
 
-    if args.cell_index is not None:
-        run_one_cell(args.h5ad_root, args.query, args.model_dir, args.cancer_gene_path, args.output_dir, args.cell_index, args.max_files, args.subset_n_cells, args.mask_ratio, args.mask_token_value, args.pad_value, args.device)
-        return
+    # if args.cell_index is not None:
+    #     run_one_cell(args.h5ad_root, args.query, args.model_dir, args.cancer_gene_path, args.output_dir, args.cell_index, args.max_files, args.subset_n_cells, args.mask_ratio, args.mask_token_value, args.pad_value, args.device)
+    #     return
 
-    print("At line 61")
-    n_cells = get_n_cells(
-        h5ad_root=args.h5ad_root,
-        query=args.query,
-        max_files=args.max_files,
-        subset_n_cells=args.subset_n_cells,
-    )
-    print("At line 68")
+    # print("At line 61")
+    # n_cells = get_n_cells(
+    #     h5ad_root=args.h5ad_root,
+    #     query=args.query,
+    #     max_files=args.max_files,
+    #     subset_n_cells=args.subset_n_cells,
+    # )
+    # print("At line 68")
 
-    if args.max_total_cells is not None:
-        n_cells = min(n_cells, args.max_total_cells)
-    print("At line 72")
+    # if args.max_total_cells is not None:
+    #     n_cells = min(n_cells, args.max_total_cells)
+    # print("At line 72")
 
-    print(f"Running prediction jobs locally for {n_cells} cells")
+    # print(f"Running prediction jobs locally for {n_cells} cells")
 
-    for cell_index in range(n_cells):
-        print(cell_index)
-        run_one_cell(args.h5ad_root, args.query, args.model_dir, args.cancer_gene_path, args.output_dir, args.cell_index, args.max_files, args.subset_n_cells, args.mask_ratio, args.mask_token_value, args.pad_value, args.device)
+    # for cell_index in range(n_cells):
+    #     print(cell_index)
+    #     run_one_cell(args.h5ad_root, args.query, args.model_dir, args.cancer_gene_path, args.output_dir, args.cell_index, args.max_files, args.subset_n_cells, args.mask_ratio, args.mask_token_value, args.pad_value, args.device)
 
 
 if __name__ == "__main__":
