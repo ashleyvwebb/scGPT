@@ -56,7 +56,7 @@ def main():
 
     if args.cell_index is not None and args.cell_index < args.subset_n_cells:
         print(f"Running single cell index {args.cell_index}")
-        # run_one_cell(args.h5ad_root, args.query, args.model_dir, args.cancer_gene_path, args.output_dir, args.cell_index, args.max_files, args.subset_n_cells, args.mask_ratio, args.mask_token_value, args.pad_value, args.device)
+        run_one_cell(args.h5ad_root, args.query, args.model_dir, args.cancer_gene_path, args.output_dir, args.cell_index, args.max_files, args.subset_n_cells, args.mask_ratio, args.mask_token_value, args.pad_value, args.device)
         return
 
 
