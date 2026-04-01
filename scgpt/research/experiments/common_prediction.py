@@ -59,7 +59,7 @@ def apply_mask_to_values(
     mask: np.ndarray,
     mask_token_value: int | float,
 ) -> np.ndarray:
-    masked = np.array(values, copy=True)
+    masked = np.array(values[0], copy=True)
     print(masked)
     print(masked.shape)
     print(mask.shape)
