@@ -179,14 +179,13 @@ class TransformerModel(nn.Module):
         src = self.encoder(src)  # (batch, seq_len, embsize) this calls the forward method of the GeneEncoder to get the token embeddings for the input gene tokens. The input src is a tensor of shape (batch_size, seq_len) containing the token ids for the genes, and the output is a tensor of shape (batch_size, seq_len, d_model) containing the corresponding token embeddings. We will use these token embeddings as the input to the transformer encoder. The gene encoder is defined above as GeneEncoder, which is a simple embedding layer that maps the input token ids to dense vectors of size d_model.
         self.cur_gene_token_embs = src
         
-        values = self.value_encoder(values)  # (batch, seq_len, embsize), encode the values to the same dimension as the token embeddings.
-        print("IN ENCODE")   
-    #     if self.input_emb_style == "scaling":
-    #         values = values.unsqueeze(2)
-    #         total_embs = src * values
-    #     else:
-    #         total_embs = src + values # combine the token embeddings and value embeddings either by scaling (element-wise multiplication) or by addition, depending on the input_emb_style. The resulting total_embs will be the input to the transformer encoder, which will learn to integrate the information from both the gene tokens and their expression values.
-
+        values = self.value_encoder(values)  # (batch, seq_len, embsize), encode the values to the same dimension as the token embeddings. 
+        if self.input_emb_style == "scaling":
+            values = values.unsqueeze(2)
+            total_embs = src * values
+        else:
+            total_embs = src + values # combine the token embeddings and value embeddings either by scaling (element-wise multiplication) or by addition, depending on the input_emb_style. The resulting total_embs will be the input to the transformer encoder, which will learn to integrate the information from both the gene tokens and their expression values.
+        print("IN ENCODE")  
     #     if getattr(self, "dsbn", None) is not None:
     #         batch_label = int(batch_labels[0].item())
     #         total_embs = self.dsbn(total_embs.permute(0, 2, 1), batch_label).permute(
