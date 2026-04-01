@@ -147,6 +147,9 @@ def main():
     gene_names = get_gene_names(adata)
 
     # one cell
+    print(adata)
+    print(adata.X)
+    print(adata.X[args.cell_index])
     cell_values = np.asarray(adata.X[args.cell_index]).reshape(-1)
     print("Cell values:", cell_values)
     print(cell_values[0])
