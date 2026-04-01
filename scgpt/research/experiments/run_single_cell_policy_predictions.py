@@ -117,14 +117,14 @@ def run_model_forward_stub(
     print("src_key_padding_mask:", src_key_padding_mask)
 
     with torch.no_grad():
-        print("HERE")
-    #     output_dict = model(
-    #         input_gene_ids,
-    #         input_values,
-    #         src_key_padding_mask=src_key_padding_mask,
-    #         MVC=False,
-    #         ECS=False,
-    #     )
+        output_dict = model(
+            input_gene_ids,
+            input_values,
+            src_key_padding_mask=src_key_padding_mask,
+            MVC=False,
+            ECS=False,
+        )
+        print("REACHED")
     #     pred = output_dict["mlm_output"]
 
     # pred = pred.squeeze(0)
