@@ -59,10 +59,7 @@ def apply_mask_to_values(
     mask: np.ndarray,
     mask_token_value: int | float,
 ) -> np.ndarray:
+    print(values)
     masked = values[0].toarray().flatten()
     masked[mask] = mask_token_value
     return masked
-
-
-def build_valid_mask(gene_ids, pad_token_id: int) -> np.ndarray:
-    return gene_ids != pad_token_id
