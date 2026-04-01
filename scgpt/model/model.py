@@ -345,11 +345,10 @@ class TransformerModel(nn.Module):
         Returns:
             dict of output Tensors.
         """
+        transformer_output = self._encode( # encodes the gene ids and values to get the input embeddings
+            src, values, src_key_padding_mask, batch_labels
+        ) # (batch, seq_len, embsize), get the output from the transformer encoder. This will be used for the MLM objective and also for getting the cell embedding for the other objectives. 
         print("REACHED")
-
-        # transformer_output = self._encode( # encodes the gene ids and values to get the input embeddings
-        #     src, values, src_key_padding_mask, batch_labels
-        # ) # (batch, seq_len, embsize), get the output from the transformer encoder. This will be used for the MLM objective and also for getting the cell embedding for the other objectives. 
         # if self.use_batch_labels: # encode the batch labels
         #     batch_emb = self.batch_encoder(batch_labels)  # (batch, embsize)
 
