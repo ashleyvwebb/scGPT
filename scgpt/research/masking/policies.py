@@ -78,9 +78,9 @@ class UniformMaskingPolicy(MaskingPolicy):
         valid_mask: np.ndarray | None,
     ) -> np.ndarray:
         n = len(gene_names)
-        probs = np.zeros(n, dtype=float)
+        probs = np.ones(n, dtype=float)
         if valid_mask is not None:
-            probs[valid_mask.astype(bool)] = 1.0
+            probs[~valid_mask.astype(bool)] = 0.0
         return probs
 
 
