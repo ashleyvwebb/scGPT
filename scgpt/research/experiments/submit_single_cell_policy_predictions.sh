@@ -5,6 +5,8 @@
 #SBATCH --mem-per-cpu=4591
 #SBATCH --time=01:00:00
 #SBATCH --array=0-9
+#SBATCH --output=joboutput_%j.out # Standard out from your job
+#SBATCH --error=joboutput_%j.err  # Standard error from your job
 
 set -euo pipefail
 
