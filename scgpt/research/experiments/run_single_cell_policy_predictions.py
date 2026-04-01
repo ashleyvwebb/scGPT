@@ -157,6 +157,7 @@ def main():
     print("pad value", vocab["<pad>"])
 
     valid_mask = build_valid_mask(gene_ids, pad_token_id=vocab["<pad>"])
+    print("valid mask", valid_mask)
     policies = build_policies(cancer_gene_set)
 
     for policy in policies:
