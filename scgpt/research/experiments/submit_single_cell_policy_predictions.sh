@@ -38,4 +38,4 @@ python -m scgpt.research.experiments.run_all_single_cell_policy_predictions \
   --mask-token-value "${MASK_TOKEN_VALUE}" \
   --pad-value "${PAD_VALUE}" \
   --cell-index 0 \
-  --device cpu
+  --device "cuda"
