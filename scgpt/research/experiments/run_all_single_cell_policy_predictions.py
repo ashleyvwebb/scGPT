@@ -52,7 +52,9 @@ def get_n_cells(h5ad_root: Path, query: str, max_files: int, subset_n_cells: int
 
 def main():
     args = parse_args()
+    print("HERE")
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    print("NOW HERE")
 
     if args.cell_index is not None:
         run_one_cell(args.h5ad_root, args.query, args.model_dir, args.cancer_gene_path, args.output_dir, args.cell_index, args.max_files, args.subset_n_cells, args.mask_ratio, args.mask_token_value, args.pad_value, args.device)
