@@ -23,21 +23,21 @@ from research.experiments.common_prediction import (
 from research.experiments.plot_prediction_results import plot_single_cell_predictions
 
 
-def parse_args():
-    p = argparse.ArgumentParser()
-    p.add_argument("--h5ad-root", type=Path, required=True)
-    p.add_argument("--query", type=str, required=True)
-    p.add_argument("--model-dir", type=Path, required=True)
-    p.add_argument("--cancer-gene-path", type=Path, required=True)
-    p.add_argument("--output-dir", type=Path, required=True)
-    p.add_argument("--cell-index", type=int, default=0)
-    p.add_argument("--max-files", type=int, default=1)
-    p.add_argument("--subset-n-cells", type=int, default=None)
-    p.add_argument("--mask-ratio", type=float, default=0.15)
-    p.add_argument("--mask-token-value", type=float, default=-1)
-    p.add_argument("--pad-value", type=float, default=0)
-    p.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
-    return p.parse_args()
+# def parse_args():
+#     p = argparse.ArgumentParser()
+#     p.add_argument("--h5ad-root", type=Path, required=True)
+#     p.add_argument("--query", type=str, required=True)
+#     p.add_argument("--model-dir", type=Path, required=True)
+#     p.add_argument("--cancer-gene-path", type=Path, required=True)
+#     p.add_argument("--output-dir", type=Path, required=True)
+#     p.add_argument("--cell-index", type=int, default=0)
+#     p.add_argument("--max-files", type=int, default=1)
+#     p.add_argument("--subset-n-cells", type=int, default=None)
+#     p.add_argument("--mask-ratio", type=float, default=0.15)
+#     p.add_argument("--mask-token-value", type=float, default=-1)
+#     p.add_argument("--pad-value", type=float, default=0)
+#     p.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
+#     return p.parse_args()
 
 
 def build_policies(cancer_gene_set: set[str]):
@@ -128,26 +128,37 @@ def run_model_forward_stub(
 
     return pred.detach().cpu().numpy()
 
-
-def main():
-    args = parse_args()
-    args.output_dir.mkdir(parents=True, exist_ok=True)
+def run_one_cell(
+        h5ad_root,
+        query, 
+        model_dir, 
+        cancer_gene_path, 
+        output_dir, 
+        cell_index, 
+        max_files, 
+        subset_n_cells,
+        mask_ratio, 
+        mask_token_value, 
+        pad_value, 
+        device):
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     adata, _ = load_query_as_adata(
-        h5ad_root=args.h5ad_root,
-        query_name=args.query,
-        max_files=args.max_files,
-        subset_n_cells=args.subset_n_cells,
+        h5ad_root=h5ad_root,
+        query_name=query,
+        max_files=max_files,
+        subset_n_cells=subset_n_cells,
         seed=0,
     )
 
-    model, vocab = load_model(str(args.model_dir), args.device)
-    cancer_gene_set = load_gene_set(args.cancer_gene_path)
+    model, vocab = load_model(str(model_dir), device)
+    cancer_gene_set = load_gene_set(cancer_gene_path)
 
     gene_names = get_gene_names(adata)
 
     # one cell
-    cell_values = np.asarray(adata.X[args.cell_index]).reshape(-1)
+    cell_values = np.asarray(adata.X[cell_index]).reshape(-1)
 
     gene_ids = np.array(
         [vocab[g] if g in vocab else vocab["<pad>"] for g in gene_names],
@@ -162,7 +173,7 @@ def main():
         masking = policy.sample_mask(
             gene_names=gene_names,
             values=cell_values,
-            mask_ratio=args.mask_ratio,
+            mask_ratio=mask_ratio,
             rng=rng,
             valid_mask=valid_mask,
         )
@@ -170,14 +181,14 @@ def main():
         masked_values = apply_mask_to_values(
             values=cell_values,
             mask=masking.mask,
-            mask_token_value=args.mask_token_value,
+            mask_token_value=mask_token_value,
         )
 
         pred_values = run_model_forward_stub(
             model=model,
             gene_ids=gene_ids,
             masked_values=masked_values,
-            device=args.device,
+            device=device,
             pad_token_id=vocab["<pad>"],
         )
 
@@ -188,10 +199,10 @@ def main():
             predicted_bins=None,
             masked_indices=masking.masked_indices,
             policy_name=policy.name,
-            cell_id=str(args.cell_index),
+            cell_id=str(cell_index),
         )
 
-        base = args.output_dir / f"cell_{args.cell_index}_{policy.name}"
+        base = output_dir / f"cell_{cell_index}_{policy.name}"
 
         plot_single_cell_predictions(
             result=result,
@@ -203,7 +214,7 @@ def main():
             json.dump(
                 {
                     "policy": policy.name,
-                    "cell_index": args.cell_index,
+                    "cell_index": cell_index,
                     "masked_indices": result.masked_indices.tolist(),
                     "target_values": result.target_values[result.masked_indices].tolist(),
                     "predicted_values": result.predicted_values[result.masked_indices].tolist(),
@@ -212,8 +223,4 @@ def main():
                 indent=2,
             )
 
-    print(f"Saved outputs to {args.output_dir}")
-
-
-if __name__ == "__main__":
-    main()
+    print(f"Saved outputs to {output_dir}")

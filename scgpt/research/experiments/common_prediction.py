@@ -60,9 +60,6 @@ def apply_mask_to_values(
     mask_token_value: int | float,
 ) -> np.ndarray:
     masked = values[0].toarray().flatten()
-    print(masked)
-    print(masked.shape)
-    print(mask.shape)
     masked[mask] = mask_token_value
     return masked
 
