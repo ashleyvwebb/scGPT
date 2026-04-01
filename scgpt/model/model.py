@@ -185,15 +185,15 @@ class TransformerModel(nn.Module):
             total_embs = src * values
         else:
             total_embs = src + values # combine the token embeddings and value embeddings either by scaling (element-wise multiplication) or by addition, depending on the input_emb_style. The resulting total_embs will be the input to the transformer encoder, which will learn to integrate the information from both the gene tokens and their expression values.
-        print("IN ENCODE")  
-    #     if getattr(self, "dsbn", None) is not None:
-    #         batch_label = int(batch_labels[0].item())
-    #         total_embs = self.dsbn(total_embs.permute(0, 2, 1), batch_label).permute(
-    #             0, 2, 1
-    #         )  # the batch norm always works on dim 1
-    #     elif getattr(self, "bn", None) is not None:
-    #         total_embs = self.bn(total_embs.permute(0, 2, 1)).permute(0, 2, 1)
-
+         
+        if getattr(self, "dsbn", None) is not None:
+            batch_label = int(batch_labels[0].item())
+            total_embs = self.dsbn(total_embs.permute(0, 2, 1), batch_label).permute(
+                0, 2, 1
+            )  # the batch norm always works on dim 1
+        elif getattr(self, "bn", None) is not None:
+            total_embs = self.bn(total_embs.permute(0, 2, 1)).permute(0, 2, 1)
+        print("IN ENCODE") 
     #     output = self.transformer_encoder(
     #         total_embs, src_key_padding_mask=src_key_padding_mask
     #     )
