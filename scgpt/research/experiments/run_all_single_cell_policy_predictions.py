@@ -58,19 +58,23 @@ def main():
         run_one_cell(args.h5ad_root, args.query, args.model_dir, args.cancer_gene_path, args.output_dir, args.cell_index, args.max_files, args.subset_n_cells, args.mask_ratio, args.mask_token_value, args.pad_value, args.device)
         return
 
+    print("At line 61")
     n_cells = get_n_cells(
         h5ad_root=args.h5ad_root,
         query=args.query,
         max_files=args.max_files,
         subset_n_cells=args.subset_n_cells,
     )
+    print("At line 68")
 
     if args.max_total_cells is not None:
         n_cells = min(n_cells, args.max_total_cells)
+    print("At line 72")
 
     print(f"Running prediction jobs locally for {n_cells} cells")
 
     for cell_index in range(n_cells):
+        print(cell_index)
         run_one_cell(args.h5ad_root, args.query, args.model_dir, args.cancer_gene_path, args.output_dir, args.cell_index, args.max_files, args.subset_n_cells, args.mask_ratio, args.mask_token_value, args.pad_value, args.device)
 
 
