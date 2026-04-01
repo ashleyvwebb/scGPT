@@ -37,17 +37,6 @@ def parse_args():
     return p.parse_args()
 
 
-def get_n_cells(h5ad_root: Path, query: str, max_files: int, subset_n_cells: int | None) -> int:
-    adata, _ = load_query_as_adata(
-        h5ad_root=h5ad_root,
-        query_name=query,
-        max_files=max_files,
-        subset_n_cells=subset_n_cells,
-        seed=0,
-    )
-    return int(adata.n_obs)
-
-
 def main():
     args = parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
