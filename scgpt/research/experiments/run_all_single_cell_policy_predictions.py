@@ -5,8 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from research.data.cxg_loader import load_query_as_adata
-from research.experiments.run_single_cell_policy_predictions import run_one_cell
+from scgpt.research.data.cxg_loader import load_query_as_adata
+from scgpt.research.experiments.run_single_cell_policy_predictions import run_one_cell
 
 
 def parse_args():

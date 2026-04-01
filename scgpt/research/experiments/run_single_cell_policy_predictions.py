@@ -7,24 +7,24 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from research.data.cxg_loader import load_query_as_adata
-from research.data.alignment import get_gene_names
-from research.masking.cancer_gene_sets import load_gene_set
-from research.masking.policies import (
+from scgpt.research.data.cxg_loader import load_query_as_adata
+from scgpt.research.data.alignment import get_gene_names
+from scgpt.research.masking.cancer_gene_sets import load_gene_set
+from scgpt.research.masking.policies import (
     UniformMaskingPolicy,
     CancerWeightedMaskingPolicy,
     ValueAwareCancerWeightedMaskingPolicy,
 )
-from research.experiments.common_prediction import (
+from scgpt.research.experiments.common_prediction import (
     SingleCellPredictionResult,
     apply_mask_to_values,
     build_valid_mask,
 )
-from research.experiments.plot_prediction_results import plot_single_cell_predictions
+from scgpt.research.experiments.plot_prediction_results import plot_single_cell_predictions
 
-from tokenizer.gene_tokenizer import GeneVocab
-from model import TransformerModel
-from utils import load_pretrained
+from scgpt.tokenizer.gene_tokenizer import GeneVocab
+from scgpt.model import TransformerModel
+from scgpt.utils import load_pretrained
 
 
 # def parse_args():

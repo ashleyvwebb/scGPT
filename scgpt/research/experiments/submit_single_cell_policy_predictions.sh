@@ -24,7 +24,7 @@ PAD_VALUE=-2
 
 mkdir -p "${OUTPUT_DIR}"
 
-python -m research.experiments.run_all_single_cell_policy_predictions \
+python -m scgpt.research.experiments.run_all_single_cell_policy_predictions \
   --h5ad-root "${H5AD_ROOT}" \
   --query "${QUERY}" \
   --model-dir "${MODEL_DIR}" \

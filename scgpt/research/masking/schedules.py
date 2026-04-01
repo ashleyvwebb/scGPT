@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from research.masking.policies import MaskingPolicy
+from scgpt.research.masking.policies import MaskingPolicy
 
 
 @dataclass

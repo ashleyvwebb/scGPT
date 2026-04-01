@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from research.data.cxg_loader import load_query_as_adata
+from scgpt.research.data.cxg_loader import load_query_as_adata
 
 
 def parse_args():
