@@ -61,6 +61,7 @@ def apply_mask_to_values(
 ) -> np.ndarray:
     masked = np.array(values, copy=True)
     print(masked)
+    print(masked.shape)
     print(mask.shape)
     masked[mask] = mask_token_value
     return masked
