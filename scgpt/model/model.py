@@ -174,12 +174,13 @@ class TransformerModel(nn.Module):
         batch_labels: Optional[Tensor] = None,  # (batch,)
     ) -> Tensor:
         self._check_batch_labels(batch_labels) # check the batch labels to ensure they are provided when required and not provided when not required.
-        print("IN ENCODE1")
+
     # essentially encode each gene to a dense vector
         src = self.encoder(src)  # (batch, seq_len, embsize) this calls the forward method of the GeneEncoder to get the token embeddings for the input gene tokens. The input src is a tensor of shape (batch_size, seq_len) containing the token ids for the genes, and the output is a tensor of shape (batch_size, seq_len, d_model) containing the corresponding token embeddings. We will use these token embeddings as the input to the transformer encoder. The gene encoder is defined above as GeneEncoder, which is a simple embedding layer that maps the input token ids to dense vectors of size d_model.
         self.cur_gene_token_embs = src
-        print("IN ENCODE2")
-    #     values = self.value_encoder(values)  # (batch, seq_len, embsize), encode the values to the same dimension as the token embeddings.
+        
+        values = self.value_encoder(values)  # (batch, seq_len, embsize), encode the values to the same dimension as the token embeddings.
+        print("IN ENCODE")   
     #     if self.input_emb_style == "scaling":
     #         values = values.unsqueeze(2)
     #         total_embs = src * values
