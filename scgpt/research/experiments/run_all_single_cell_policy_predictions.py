@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import subprocess
-import sys
 from pathlib import Path
 
 from scgpt.research.data.cxg_loader import load_query_as_adata

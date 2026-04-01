@@ -1,8 +1,10 @@
 #!/bin/bash
 #SBATCH --nodes=1
+#SBATCH --partition=gpu
+#SBATCH --gres=gpu:lovelace_l40:1
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=2
-#SBATCH --mem-per-cpu=4591
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=5960
 #SBATCH --time=01:00:00
 #SBATCH --array=0-1
 
