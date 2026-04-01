@@ -72,4 +72,5 @@ def build_valid_mask(values: np.ndarray, pad_value: int | float | None = None) -
     print(values.shape)
     print(pad_values.shape)
     print(values)
+    print(pad_values)
     return np.not_equal(values, pad_values)
