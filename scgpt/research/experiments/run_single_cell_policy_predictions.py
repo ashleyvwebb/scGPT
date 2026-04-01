@@ -105,21 +105,21 @@ def run_model_forward_stub(
     model.eval()
     print("gene_ids:", gene_ids)
     input_gene_ids = torch.as_tensor(gene_ids, dtype=torch.long, device=device).unsqueeze(0)
-    print("input_gene_ids:", input_gene_ids)
+    print("input_gene_ids:", input_gene_ids.shape)
     print("masked_values:", masked_values)
     input_values = torch.as_tensor(masked_values, device=device).unsqueeze(0)
-    print("input_values:", input_values)
+    print("input_values:", input_values.shape)
 
     src_key_padding_mask = input_gene_ids.eq(pad_token_id)
-    print("src_key_padding_mask:", src_key_padding_mask)
+    print("src_key_padding_mask:", src_key_padding_mask.shape)
 
-    with torch.no_grad():
-        output_dict = model(
-            input_gene_ids,
-            input_values,
-            src_key_padding_mask=src_key_padding_mask,
-        )
-        print("REACHED")
+    # with torch.no_grad():
+    #     output_dict = model(
+    #         input_gene_ids,
+    #         input_values,
+    #         src_key_padding_mask=src_key_padding_mask,
+    #     )
+    #     print("REACHED")
     #     pred = output_dict["mlm_output"]
 
     # pred = pred.squeeze(0)
