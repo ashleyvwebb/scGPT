@@ -116,7 +116,8 @@ def run_model_forward_stub(
     src_key_padding_mask = input_gene_ids.eq(pad_token_id)
     print("src_key_padding_mask:", src_key_padding_mask)
 
-    # with torch.no_grad():
+    with torch.no_grad():
+        print("HERE")
     #     output_dict = model(
     #         input_gene_ids,
     #         input_values,
