@@ -106,27 +106,31 @@ def run_model_forward_stub(
     pad_token_id: int,
 ):
     model.eval()
-
+    print("gene_ids:", gene_ids)
     input_gene_ids = torch.as_tensor(gene_ids, dtype=torch.long, device=device).unsqueeze(0)
+    print("input_gene_ids:", input_gene_ids)
+    print("masked_values:", masked_values)
     input_values = torch.as_tensor(masked_values, device=device).unsqueeze(0)
+    print("input_values:", input_values)
 
     src_key_padding_mask = input_gene_ids.eq(pad_token_id)
+    print("src_key_padding_mask:", src_key_padding_mask)
 
-    with torch.no_grad():
-        output_dict = model(
-            input_gene_ids,
-            input_values,
-            src_key_padding_mask=src_key_padding_mask,
-            MVC=False,
-            ECS=False,
-        )
-        pred = output_dict["mlm_output"]
+    # with torch.no_grad():
+    #     output_dict = model(
+    #         input_gene_ids,
+    #         input_values,
+    #         src_key_padding_mask=src_key_padding_mask,
+    #         MVC=False,
+    #         ECS=False,
+    #     )
+    #     pred = output_dict["mlm_output"]
 
-    pred = pred.squeeze(0)
-    if pred.ndim == 2 and pred.shape[-1] == 1:
-        pred = pred.squeeze(-1)
+    # pred = pred.squeeze(0)
+    # if pred.ndim == 2 and pred.shape[-1] == 1:
+    #     pred = pred.squeeze(-1)
 
-    return pred.detach().cpu().numpy()
+    # return pred.detach().cpu().numpy()
 
 def run_one_cell(
         h5ad_root,
