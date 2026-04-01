@@ -167,60 +167,61 @@ def run_one_cell(
 
     valid_mask = build_valid_mask(gene_ids, pad_token_id=vocab["<pad>"])
     policies = build_policies(cancer_gene_set)
+    print("GOT TO HERE")
 
-    for policy in policies:
-        rng = np.random.default_rng(0)
-        masking = policy.sample_mask(
-            gene_names=gene_names,
-            values=cell_values,
-            mask_ratio=mask_ratio,
-            rng=rng,
-            valid_mask=valid_mask,
-        )
+    # for policy in policies:
+    #     rng = np.random.default_rng(0)
+    #     masking = policy.sample_mask(
+    #         gene_names=gene_names,
+    #         values=cell_values,
+    #         mask_ratio=mask_ratio,
+    #         rng=rng,
+    #         valid_mask=valid_mask,
+    #     )
 
-        masked_values = apply_mask_to_values(
-            values=cell_values,
-            mask=masking.mask,
-            mask_token_value=mask_token_value,
-        )
+    #     masked_values = apply_mask_to_values(
+    #         values=cell_values,
+    #         mask=masking.mask,
+    #         mask_token_value=mask_token_value,
+    #     )
 
-        pred_values = run_model_forward_stub(
-            model=model,
-            gene_ids=gene_ids,
-            masked_values=masked_values,
-            device=device,
-            pad_token_id=vocab["<pad>"],
-        )
+    #     pred_values = run_model_forward_stub(
+    #         model=model,
+    #         gene_ids=gene_ids,
+    #         masked_values=masked_values,
+    #         device=device,
+    #         pad_token_id=vocab["<pad>"],
+    #     )
 
-        result = SingleCellPredictionResult(
-            gene_names=list(gene_names),
-            target_values=np.asarray(cell_values, dtype=float),
-            predicted_values=np.asarray(pred_values, dtype=float),
-            predicted_bins=None,
-            masked_indices=masking.masked_indices,
-            policy_name=policy.name,
-            cell_id=str(cell_index),
-        )
+    #     result = SingleCellPredictionResult(
+    #         gene_names=list(gene_names),
+    #         target_values=np.asarray(cell_values, dtype=float),
+    #         predicted_values=np.asarray(pred_values, dtype=float),
+    #         predicted_bins=None,
+    #         masked_indices=masking.masked_indices,
+    #         policy_name=policy.name,
+    #         cell_id=str(cell_index),
+    #     )
 
-        base = output_dir / f"cell_{cell_index}_{policy.name}"
+    #     base = output_dir / f"cell_{cell_index}_{policy.name}"
 
-        plot_single_cell_predictions(
-            result=result,
-            output_path=base.with_suffix(".png"),
-            discrete=False,
-        )
+    #     plot_single_cell_predictions(
+    #         result=result,
+    #         output_path=base.with_suffix(".png"),
+    #         discrete=False,
+    #     )
 
-        with base.with_suffix(".json").open("w") as f:
-            json.dump(
-                {
-                    "policy": policy.name,
-                    "cell_index": cell_index,
-                    "masked_indices": result.masked_indices.tolist(),
-                    "target_values": result.target_values[result.masked_indices].tolist(),
-                    "predicted_values": result.predicted_values[result.masked_indices].tolist(),
-                },
-                f,
-                indent=2,
-            )
+    #     with base.with_suffix(".json").open("w") as f:
+    #         json.dump(
+    #             {
+    #                 "policy": policy.name,
+    #                 "cell_index": cell_index,
+    #                 "masked_indices": result.masked_indices.tolist(),
+    #                 "target_values": result.target_values[result.masked_indices].tolist(),
+    #                 "predicted_values": result.predicted_values[result.masked_indices].tolist(),
+    #             },
+    #             f,
+    #             indent=2,
+    #         )
 
-    print(f"Saved outputs to {output_dir}")
+    # print(f"Saved outputs to {output_dir}")

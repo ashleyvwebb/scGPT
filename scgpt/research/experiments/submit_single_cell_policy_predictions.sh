@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem-per-cpu=4591
 #SBATCH --time=01:00:00
-#SBATCH --array=0-9
+#SBATCH --array=0-1
 
 set -euo pipefail
 
@@ -17,7 +17,7 @@ OUTPUT_DIR="${PROJECT_ROOT}/research/results/single_cell_policy_predictions/lung
 
 QUERY="lung-cancer"
 MAX_FILES=1
-SUBSET_N_CELLS=10
+SUBSET_N_CELLS=2
 MASK_RATIO=0.15
 MASK_TOKEN_VALUE=-1
 PAD_VALUE=-2
