@@ -149,6 +149,8 @@ def main():
     # one cell
     cell_values = np.asarray(adata.X[args.cell_index]).reshape(-1)
     print("Cell values:", cell_values)
+    print(cell_values.toarray())
+    print()
 
     gene_ids = np.array(
         [vocab[g] if g in vocab else vocab["<pad>"] for g in gene_names],
