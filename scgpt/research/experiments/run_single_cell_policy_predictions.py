@@ -241,6 +241,7 @@ def run_one_cell(
     mask_token_value,
     pad_value,
     device,
+    expr_name
 ):
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -312,7 +313,7 @@ def run_one_cell(
             cell_id=str(cell_index),
         )
 
-        base = output_dir / f"cell_{cell_index}_{policy.name}"
+        base = output_dir / expr_name / policy.name /f"cell_{cell_index}"
 
         plot_single_cell_predictions(
             result=result,
@@ -355,6 +356,12 @@ def parse_args():
         type=str,
         default="cuda" if torch.cuda.is_available() else "cpu",
     )
+    p.add_argument(
+        "--expr-name",
+        type=str,
+        default="expr1",
+        help="Name of this experiment, used for organizing output subdirectories.",
+    )
     return p.parse_args()
 
 
@@ -373,6 +380,7 @@ def main():
         mask_token_value=args.mask_token_value,
         pad_value=args.pad_value,
         device=args.device,
+        expr_name=args.expr_name
     )
 
 
