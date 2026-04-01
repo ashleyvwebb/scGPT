@@ -89,7 +89,7 @@ def load_model(model_dir: str, device):
         d_hid,
         nlayers,
         vocab=vocab,
-        pad_value=0,
+        pad_value=-2,
         n_input_bins=51,
     )
     load_pretrained(model, torch.load(model_file, map_location=device), verbose=False)
@@ -121,8 +121,6 @@ def run_model_forward_stub(
             input_gene_ids,
             input_values,
             src_key_padding_mask=src_key_padding_mask,
-            MVC=False,
-            ECS=False,
         )
         print("REACHED")
     #     pred = output_dict["mlm_output"]
