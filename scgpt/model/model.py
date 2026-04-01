@@ -174,30 +174,30 @@ class TransformerModel(nn.Module):
         batch_labels: Optional[Tensor] = None,  # (batch,)
     ) -> Tensor:
         self._check_batch_labels(batch_labels) # check the batch labels to ensure they are provided when required and not provided when not required.
+        print("IN ENCODE")
+    # # essentially encode each gene to a dense vector
+    #     src = self.encoder(src)  # (batch, seq_len, embsize) this calls the forward method of the GeneEncoder to get the token embeddings for the input gene tokens. The input src is a tensor of shape (batch_size, seq_len) containing the token ids for the genes, and the output is a tensor of shape (batch_size, seq_len, d_model) containing the corresponding token embeddings. We will use these token embeddings as the input to the transformer encoder. The gene encoder is defined above as GeneEncoder, which is a simple embedding layer that maps the input token ids to dense vectors of size d_model.
+    #     self.cur_gene_token_embs = src
 
-    # essentially encode each gene to a dense vector
-        src = self.encoder(src)  # (batch, seq_len, embsize) this calls the forward method of the GeneEncoder to get the token embeddings for the input gene tokens. The input src is a tensor of shape (batch_size, seq_len) containing the token ids for the genes, and the output is a tensor of shape (batch_size, seq_len, d_model) containing the corresponding token embeddings. We will use these token embeddings as the input to the transformer encoder. The gene encoder is defined above as GeneEncoder, which is a simple embedding layer that maps the input token ids to dense vectors of size d_model.
-        self.cur_gene_token_embs = src
+    #     values = self.value_encoder(values)  # (batch, seq_len, embsize), encode the values to the same dimension as the token embeddings.
+    #     if self.input_emb_style == "scaling":
+    #         values = values.unsqueeze(2)
+    #         total_embs = src * values
+    #     else:
+    #         total_embs = src + values # combine the token embeddings and value embeddings either by scaling (element-wise multiplication) or by addition, depending on the input_emb_style. The resulting total_embs will be the input to the transformer encoder, which will learn to integrate the information from both the gene tokens and their expression values.
 
-        values = self.value_encoder(values)  # (batch, seq_len, embsize), encode the values to the same dimension as the token embeddings.
-        if self.input_emb_style == "scaling":
-            values = values.unsqueeze(2)
-            total_embs = src * values
-        else:
-            total_embs = src + values # combine the token embeddings and value embeddings either by scaling (element-wise multiplication) or by addition, depending on the input_emb_style. The resulting total_embs will be the input to the transformer encoder, which will learn to integrate the information from both the gene tokens and their expression values.
+    #     if getattr(self, "dsbn", None) is not None:
+    #         batch_label = int(batch_labels[0].item())
+    #         total_embs = self.dsbn(total_embs.permute(0, 2, 1), batch_label).permute(
+    #             0, 2, 1
+    #         )  # the batch norm always works on dim 1
+    #     elif getattr(self, "bn", None) is not None:
+    #         total_embs = self.bn(total_embs.permute(0, 2, 1)).permute(0, 2, 1)
 
-        if getattr(self, "dsbn", None) is not None:
-            batch_label = int(batch_labels[0].item())
-            total_embs = self.dsbn(total_embs.permute(0, 2, 1), batch_label).permute(
-                0, 2, 1
-            )  # the batch norm always works on dim 1
-        elif getattr(self, "bn", None) is not None:
-            total_embs = self.bn(total_embs.permute(0, 2, 1)).permute(0, 2, 1)
-
-        output = self.transformer_encoder(
-            total_embs, src_key_padding_mask=src_key_padding_mask
-        )
-        return output  # (batch, seq_len, embsize)
+    #     output = self.transformer_encoder(
+    #         total_embs, src_key_padding_mask=src_key_padding_mask
+    #     )
+    #     return output  # (batch, seq_len, embsize)
 
     def _get_cell_emb_from_layer(
         self, layer_output: Tensor, weights: Tensor = None
