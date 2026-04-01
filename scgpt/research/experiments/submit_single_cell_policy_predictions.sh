@@ -5,8 +5,8 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=5960
-#SBATCH --time=01:00:00
-#SBATCH --array=0-1
+#SBATCH --time=00:20:00
+
 
 set -euo pipefail
 
@@ -19,7 +19,7 @@ OUTPUT_DIR="${PROJECT_ROOT}/research/results/single_cell_policy_predictions/lung
 
 QUERY="lung-cancer"
 MAX_FILES=1
-SUBSET_N_CELLS=2
+SUBSET_N_CELLS=1
 MASK_RATIO=0.15
 MASK_TOKEN_VALUE=-1
 PAD_VALUE=-2
@@ -37,5 +37,5 @@ python -m scgpt.research.experiments.run_all_single_cell_policy_predictions \
   --mask-ratio "${MASK_RATIO}" \
   --mask-token-value "${MASK_TOKEN_VALUE}" \
   --pad-value "${PAD_VALUE}" \
-  --cell-index "${SLURM_ARRAY_TASK_ID}" \
+  --cell-index 0 \
   --device cpu
