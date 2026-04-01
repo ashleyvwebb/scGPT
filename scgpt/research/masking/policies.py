@@ -148,9 +148,14 @@ class ValueAwareCancerWeightedMaskingPolicy(CancerWeightedMaskingPolicy):
         valid_mask: np.ndarray | None = None,
     ) -> np.ndarray:
         base = super().get_probabilities(gene_names, values, valid_mask=valid_mask)
+        print("a)")
         values = np.asarray(values, dtype=float)
+        print("b)")
         value_scale = np.power(np.clip(values, a_min=0.0, a_max=None) + 1.0, self.value_power)
+        print("c)")
         probs = base * value_scale
+        print("d)")
         if valid_mask is not None:
+            print("e)")
             probs[~valid_mask.astype(bool)] = 0.0
         return probs
