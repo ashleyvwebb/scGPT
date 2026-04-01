@@ -193,10 +193,11 @@ class TransformerModel(nn.Module):
             )  # the batch norm always works on dim 1
         elif getattr(self, "bn", None) is not None:
             total_embs = self.bn(total_embs.permute(0, 2, 1)).permute(0, 2, 1)
+        
+        output = self.transformer_encoder(
+            total_embs, src_key_padding_mask=src_key_padding_mask
+        )
         print("IN ENCODE") 
-    #     output = self.transformer_encoder(
-    #         total_embs, src_key_padding_mask=src_key_padding_mask
-    #     )
     #     return output  # (batch, seq_len, embsize)
 
     def _get_cell_emb_from_layer(
