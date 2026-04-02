@@ -104,7 +104,7 @@ def preprocess_adata(
         filter_cell_by_counts=False,
         normalize_total=1e4,
         result_normed_key="X_normed",
-        log1p=True,
+        log1p=False,
         result_log1p_key="X_log1p",
         subset_hvg=False,
         hvg_flavor="seurat_v3",
@@ -123,7 +123,7 @@ def prepare_single_cell_tokenized_input(
     pad_token: str = "<pad>",
     pad_value: int = -2,
     append_cls: bool = False,
-    include_zero_gene: bool = True,
+    include_zero_gene: bool = False,
 ):
     """
     Preprocess and tokenize one cell so the model sees shape (1, L), not raw (G,).
