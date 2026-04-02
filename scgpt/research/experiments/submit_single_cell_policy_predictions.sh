@@ -4,7 +4,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=4591
 #SBATCH --time=00:02:00
-#SBATCH --array=0-1
+#SBATCH --array=0-9
 
 set -euo pipefail
 
@@ -17,7 +17,7 @@ OUTPUT_DIR="${PROJECT_ROOT}/research/results/single_cell_policy_predictions/"
 
 QUERY="blood"
 MAX_FILES=1
-SUBSET_N_CELLS=2
+SUBSET_N_CELLS=10
 MASK_RATIO=0.15
 MASK_TOKEN_VALUE=-1
 PAD_VALUE=-2
