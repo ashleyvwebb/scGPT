@@ -165,11 +165,6 @@ def prepare_single_cell_tokenized_input(
     # tokenized["genes"] and tokenized["values"] are shape (1, L)
     tokenized_gene_ids = tokenized["genes"][0].detach().cpu().numpy()
     tokenized_values = tokenized["values"][0].detach().cpu().numpy()
-
-    print(tokenized_values.shape)
-
-    if True:
-        return
     
     stoi = vocab.get_stoi()
     pad_token_id = stoi[pad_token]
@@ -179,6 +174,8 @@ def prepare_single_cell_tokenized_input(
 
     # Valid positions are real genes only; exclude <pad>
     valid_mask = tokenized_values != pad_value
+    print(len(tokenized_values))
+    print(len(valid_mask))
 
     return {
         "tokenized_gene_ids": tokenized_gene_ids,
