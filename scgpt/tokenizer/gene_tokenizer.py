@@ -354,11 +354,13 @@ def pad_batch(
 
     for i in range(len(batch)):
         gene_ids, values, mod_types = batch[i]
+        print(len(gene_ids))
 
         if len(gene_ids) > max_len:
             # sample max_len genes
             if not cls_appended:
                 idx = np.random.choice(len(gene_ids), max_len, replace=False)
+                print(len(idx))
             else:
                 idx = np.random.choice(len(gene_ids) - 1, max_len - 1, replace=False)
                 idx = idx + 1
