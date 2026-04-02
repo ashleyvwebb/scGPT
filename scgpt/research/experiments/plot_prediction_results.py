@@ -16,8 +16,12 @@ def plot_single_cell_predictions(
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    x = result.target_values[result.masked_indices]
-    y = result.predicted_values[result.masked_indices]
+    masked_and_nonzero = result.masked_indices[result.target_values[result.masked_indices] > 0]
+    x = result.target_values[masked_and_nonzero]
+    y = result.predicted_values[masked_and_nonzero]
+    
+    # x = result.target_values[result.masked_indices]
+    # y = result.predicted_values[result.masked_indices]
     r = masked_pearsonr(x, y)
 
     plt.figure(figsize=(6, 6))
