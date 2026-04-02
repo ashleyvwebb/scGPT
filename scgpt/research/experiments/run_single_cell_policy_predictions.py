@@ -104,7 +104,7 @@ def preprocess_adata(
         filter_cell_by_counts=False,
         normalize_total=1e4,
         result_normed_key="X_normed",
-        log1p=False,
+        log1p=True,
         result_log1p_key="X_log1p",
         subset_hvg=False,
         hvg_flavor="seurat_v3",
@@ -123,7 +123,7 @@ def prepare_single_cell_tokenized_input(
     pad_token: str = "<pad>",
     pad_value: int = -2,
     append_cls: bool = False,
-    include_zero_gene: bool = False,
+    include_zero_gene: bool = True,
 ):
     """
     Preprocess and tokenize one cell so the model sees shape (1, L), not raw (G,).
@@ -217,7 +217,7 @@ def run_model_forward(
             input_gene_ids,
             input_values,
             src_key_padding_mask=src_key_padding_mask,
-            MVC=False,
+            MVC=True,
             ECS=False,
         )
         pred = output_dict["mlm_output"]
