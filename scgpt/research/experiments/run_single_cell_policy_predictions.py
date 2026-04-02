@@ -222,13 +222,12 @@ def run_model_forward(
         )
         pred = output_dict["mlm_output"]
 
-    print("=" * 80)
     print(pred.shape)
+    print(np.std(pred))
     print(pred)
 
     pred = pred.squeeze(0)
     print(pred.shape)
-    print("=" * 80)
     if pred.ndim == 2 and pred.shape[-1] == 1:
         pred = pred.squeeze(-1)
 
@@ -295,7 +294,7 @@ def run_one_cell(
             rng=rng,
             valid_mask=valid_mask,
         )
-
+        print("=" * 80)
         print(policy.name)
         print("Num masking", masking.mask.sum())
 
@@ -312,6 +311,9 @@ def run_one_cell(
             device=device,
             pad_token_id=pad_token_id,
         )
+
+        print(pred_values.shape)
+        print(pred_values)
 
         print("target min/max/mean:", tokenized_values.min(), tokenized_values.max(), tokenized_values.mean())
         print("pred min/max/mean:", pred_values.min(), pred_values.max(), pred_values.mean())
