@@ -224,6 +224,10 @@ def run_model_forward(
         )
         pred = output_dict["mlm_output"]
 
+    print("=" * 80)
+    print(pred.shape)
+    print("=" * 80)
+
     pred = pred.squeeze(0)
     if pred.ndim == 2 and pred.shape[-1] == 1:
         pred = pred.squeeze(-1)
@@ -270,7 +274,7 @@ def run_one_cell(
         pad_token="<pad>",
         pad_value=pad_value,
         append_cls=False,
-        include_zero_gene=True,
+        include_zero_gene=False,
     )
 
     tokenized_gene_ids = prepared["tokenized_gene_ids"]
