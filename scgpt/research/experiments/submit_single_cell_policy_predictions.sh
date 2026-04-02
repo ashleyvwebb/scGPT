@@ -15,7 +15,7 @@ MODEL_DIR="${PROJECT_ROOT}/research/pretrained_models/whole_human"
 CANCER_GENE_PATH="${PROJECT_ROOT}/research/data/cancer_genes/cancer_gene_list.txt"
 OUTPUT_DIR="${PROJECT_ROOT}/research/results/single_cell_policy_predictions/"
 
-QUERY="lung-cancer"
+QUERY="blood"
 MAX_FILES=1
 SUBSET_N_CELLS=10
 MASK_RATIO=0.15
@@ -37,4 +37,4 @@ python -m scgpt.research.experiments.run_single_cell_policy_predictions \
   --pad-value "${PAD_VALUE}" \
   --cell-index "${SLURM_ARRAY_TASK_ID}" \
   --device cpu \
-  --expr-name "D"
+  --expr-name "A"
