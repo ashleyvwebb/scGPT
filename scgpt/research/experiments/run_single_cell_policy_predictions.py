@@ -223,7 +223,6 @@ def run_model_forward(
         pred = output_dict["mlm_output"]
 
     print(pred.shape)
-    print(np.std(pred))
     print(pred)
 
     pred = pred.squeeze(0)
@@ -313,6 +312,7 @@ def run_one_cell(
         )
 
         print(pred_values.shape)
+        print(np.std(pred_values))
         print(pred_values)
 
         print("target min/max/mean:", tokenized_values.min(), tokenized_values.max(), tokenized_values.mean())
