@@ -172,8 +172,8 @@ def prepare_single_cell_tokenized_input(
     id_to_token = {v: k for k, v in stoi.items()}
     tokenized_gene_names = [id_to_token.get(int(gid), "<unk>") for gid in tokenized_gene_ids]
 
-    # Valid positions are real genes only; exclude <pad> and <cls>
-    valid_mask = tokenized_gene_ids != pad_token_id
+    # Valid positions are real genes only; exclude <pad>
+    valid_mask = tokenized_values != pad_value
 
     return {
         "tokenized_gene_ids": tokenized_gene_ids,

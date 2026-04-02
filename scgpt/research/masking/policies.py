@@ -67,21 +67,61 @@ class MaskingPolicy:
             masked_indices=np.sort(chosen),
         )
 
-
 class UniformMaskingPolicy(MaskingPolicy):
     name = "uniform"
 
     def get_probabilities(
         self,
-        gene_names: Sequence[str],
+        gene_names,
         values: np.ndarray,
         valid_mask: np.ndarray | None,
     ) -> np.ndarray:
-        n = len(gene_names)
+        n = len(values)
         probs = np.ones(n, dtype=float)
         if valid_mask is not None:
             probs[~valid_mask.astype(bool)] = 0.0
         return probs
+
+    def sample_mask(
+        self,
+        gene_names,
+        values: np.ndarray,
+        mask_ratio: float,
+        rng: np.random.Generator,
+        valid_mask: np.ndarray | None,
+        min_masks: int = 1,  # ignored here to match scGPT
+    ) -> MaskingResult:
+        n = len(values)
+        if n == 0:
+            raise ValueError("No genes provided to masking policy.")
+
+        if valid_mask is None:
+            valid_mask = np.ones(n, dtype=bool)
+        else:
+            valid_mask = valid_mask.astype(bool)
+
+        valid_indices = np.where(valid_mask)[0]
+
+        # Match scGPT random_mask_value exactly: floor, no forced minimum
+        k = int(len(valid_indices) * mask_ratio)
+
+        if k == 0:
+            chosen = np.array([], dtype=int)
+        else:
+            chosen = rng.choice(valid_indices, size=k, replace=False)
+
+        mask = np.zeros(n, dtype=bool)
+        mask[chosen] = True
+
+        probs = np.zeros(n, dtype=float)
+        if len(valid_indices) > 0:
+            probs[valid_indices] = 1.0 / len(valid_indices)
+
+        return MaskingResult(
+            mask=mask,
+            probabilities=probs,
+            masked_indices=np.sort(chosen),
+        )
 
 
 class CancerWeightedMaskingPolicy(MaskingPolicy):
