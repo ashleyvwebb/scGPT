@@ -225,9 +225,10 @@ def run_model_forward(
     print("=" * 80)
     print(pred.shape)
     print(pred)
-    print("=" * 80)
 
     pred = pred.squeeze(0)
+    print(pred.shape)
+    print("=" * 80)
     if pred.ndim == 2 and pred.shape[-1] == 1:
         pred = pred.squeeze(-1)
 
