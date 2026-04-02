@@ -15,7 +15,7 @@ MODEL_DIR="${PROJECT_ROOT}/research/pretrained_models/whole_human"
 CANCER_GENE_PATH="${PROJECT_ROOT}/research/data/cancer_genes/cancer_gene_list.txt"
 OUTPUT_DIR="${PROJECT_ROOT}/research/results/single_cell_policy_predictions/"
 
-QUERY="lung_cancer"
+QUERY="lung-cancer"
 MAX_FILES=1
 SUBSET_N_CELLS=2
 MASK_RATIO=0.15
