@@ -341,6 +341,7 @@ def pad_batch(
     print("PADDING")
     max_ori_len = max(len(batch[i][0]) for i in range(len(batch)))
     print(max_ori_len)
+    print(max_len)
     max_len = min(max_ori_len, max_len)
     print(max_len)
 
