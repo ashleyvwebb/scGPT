@@ -123,7 +123,7 @@ def prepare_single_cell_tokenized_input(
     pad_token: str = "<pad>",
     pad_value: int = -2,
     append_cls: bool = False,
-    include_zero_gene: bool = False,
+    include_zero_gene: bool = True,
 ):
     """
     Preprocess and tokenize one cell so the model sees shape (1, L), not raw (G,).
