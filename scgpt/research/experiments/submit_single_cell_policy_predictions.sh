@@ -29,7 +29,7 @@ python -m scgpt.research.experiments.run_single_cell_policy_predictions \
   --query "${QUERY}" \
   --model-dir "${MODEL_DIR}" \
   --cancer-gene-path "${CANCER_GENE_PATH}" \
-  --output-dir "${OUTPUT_DIR}\ ${QUERY}" \
+  --output-dir "${OUTPUT_DIR}/${QUERY}" \
   --max-files "${MAX_FILES}" \
   --subset-n-cells "${SUBSET_N_CELLS}" \
   --mask-ratio "${MASK_RATIO}" \
