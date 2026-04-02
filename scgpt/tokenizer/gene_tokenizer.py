@@ -360,14 +360,12 @@ def pad_batch(
             # sample max_len genes
             if not cls_appended:
                 idx = np.random.choice(len(gene_ids), max_len, replace=False)
-                print(len(idx))
             else:
                 idx = np.random.choice(len(gene_ids) - 1, max_len - 1, replace=False)
                 idx = idx + 1
                 idx = np.insert(idx, 0, 0)
             gene_ids = gene_ids[idx]
             values = values[idx]
-            print(len(values))
             if mod_types is not None:
                 mod_types = mod_types[idx]
         if len(gene_ids) < max_len:
@@ -385,6 +383,7 @@ def pad_batch(
                     torch.full((max_len - len(values),), pad_value, dtype=values.dtype),
                 ]
             )
+            print(len(values))
             if mod_types is not None:
                 mod_types = torch.cat(
                     [
