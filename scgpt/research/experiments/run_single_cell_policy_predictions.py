@@ -174,8 +174,6 @@ def prepare_single_cell_tokenized_input(
 
     # Valid positions are real genes only; exclude <pad>
     valid_mask = tokenized_values != pad_value
-    print(len(tokenized_values))
-    print(len(valid_mask))
 
     return {
         "tokenized_gene_ids": tokenized_gene_ids,
@@ -226,6 +224,7 @@ def run_model_forward(
 
     print("=" * 80)
     print(pred.shape)
+    print(pred)
     print("=" * 80)
 
     pred = pred.squeeze(0)
@@ -296,6 +295,7 @@ def run_one_cell(
             valid_mask=valid_mask,
         )
 
+        print(policy.name)
         print("Num masking", masking.mask.sum())
 
         masked_values = apply_mask_to_values(
@@ -303,7 +303,6 @@ def run_one_cell(
             mask=masking.mask,
             mask_token_value=mask_token_value,
         )
-        print(len(masked_values))
 
         pred_values = run_model_forward(
             model=model,
@@ -312,7 +311,6 @@ def run_one_cell(
             device=device,
             pad_token_id=pad_token_id,
         )
-        print(len(pred_values))
 
         print("target min/max/mean:", tokenized_values.min(), tokenized_values.max(), tokenized_values.mean())
         print("pred min/max/mean:", pred_values.min(), pred_values.max(), pred_values.mean())
