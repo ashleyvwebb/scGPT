@@ -162,7 +162,7 @@ def prepare_single_cell_tokenized_input(
         include_zero_gene=include_zero_gene,
     )
 
-    print(tokenized["genes"])
+    print(tokenized["genes"][0].shape)
 
     if True:
         return
