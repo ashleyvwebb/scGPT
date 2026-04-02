@@ -37,4 +37,4 @@ python -m scgpt.research.experiments.run_single_cell_policy_predictions \
   --pad-value "${PAD_VALUE}" \
   --cell-index "${SLURM_ARRAY_TASK_ID}" \
   --device cpu \
-  --expr-name "testing_tok_log1p_inc_zero"
+  --expr-name "A"
