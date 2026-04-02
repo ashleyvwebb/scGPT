@@ -269,6 +269,9 @@ def tokenize_batch(
     Returns:
         list: A list of tuple (gene_id, count) of non zero gene expressions.
     """
+    print("TOKENIZE BATCH")
+    print(data)
+    print(gene_ids)
     if data.shape[1] != len(gene_ids):
         raise ValueError(
             f"Number of features in data ({data.shape[1]}) does not match "
@@ -283,6 +286,8 @@ def tokenize_batch(
     tokenized_data = []
     for i in range(len(data)):
         row = data[i]
+        print(i)
+        print(row)
         mod_types = None
         if include_zero_gene:
             values = row
@@ -291,7 +296,9 @@ def tokenize_batch(
                 mod_types = mod_type
         else:
             idx = np.nonzero(row)[0]
+            print(len(idx))
             values = row[idx]
+            print(values)
             genes = gene_ids[idx]
             if mod_type is not None:
                 mod_types = mod_type[idx]
