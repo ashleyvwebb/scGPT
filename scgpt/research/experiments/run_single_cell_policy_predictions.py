@@ -104,7 +104,7 @@ def preprocess_adata(
         filter_cell_by_counts=False,
         normalize_total=1e4,
         result_normed_key="X_normed",
-        log1p=False,
+        log1p=True,
         result_log1p_key="X_log1p",
         subset_hvg=False,
         hvg_flavor="seurat_v3",
@@ -302,6 +302,10 @@ def run_one_cell(
             device=device,
             pad_token_id=pad_token_id,
         )
+
+        print("target min/max/mean:", tokenized_values.min(), tokenized_values.max(), tokenized_values.mean())
+        print("pred min/max/mean:", pred_values.min(), pred_values.max(), pred_values.mean())
+        print("fraction target==0 on masked:", np.mean(tokenized_values[masking.masked_indices] == 0))
 
         result = SingleCellPredictionResult(
             gene_names=list(tokenized_gene_names),

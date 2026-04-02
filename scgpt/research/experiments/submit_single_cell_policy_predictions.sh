@@ -37,4 +37,4 @@ python -m scgpt.research.experiments.run_single_cell_policy_predictions \
   --pad-value "${PAD_VALUE}" \
   --cell-index "${SLURM_ARRAY_TASK_ID}" \
   --device cpu \
-  --expr-name "no_plot_on_zero_genes"
+  --expr-name "no_zero_gene_w_log1p"
