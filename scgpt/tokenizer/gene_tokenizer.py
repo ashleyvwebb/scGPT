@@ -313,6 +313,7 @@ def tokenize_batch(
             if mod_type is not None:
                 mod_types = torch.from_numpy(mod_types).long()
         tokenized_data.append((genes, values, mod_types))
+    print(tokenized_data)
     return tokenized_data
 
 
