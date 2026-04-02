@@ -162,8 +162,10 @@ def prepare_single_cell_tokenized_input(
         include_zero_gene=include_zero_gene,
     )
 
+    print(tokenized["genes"])
+
     if True:
-        return 
+        return
 
     # tokenized["genes"] and tokenized["values"] are shape (1, L)
     tokenized_gene_ids = tokenized["genes"][0].detach().cpu().numpy()

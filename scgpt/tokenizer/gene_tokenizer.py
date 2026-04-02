@@ -338,10 +338,14 @@ def pad_batch(
     Returns:
         Dict[str, torch.Tensor]: A dictionary of gene_id and count.
     """
+    print("PADDING")
     max_ori_len = max(len(batch[i][0]) for i in range(len(batch)))
+    print(max_ori_len)
     max_len = min(max_ori_len, max_len)
+    print(max_len)
 
     pad_id = vocab[pad_token]
+    print(pad_id)
     if vocab_mod is not None:
         mod_pad_id = vocab_mod[pad_token]
     gene_ids_list = []
@@ -361,6 +365,7 @@ def pad_batch(
                 idx = np.insert(idx, 0, 0)
             gene_ids = gene_ids[idx]
             values = values[idx]
+            print(len(values))
             if mod_types is not None:
                 mod_types = mod_types[idx]
         if len(gene_ids) < max_len:
