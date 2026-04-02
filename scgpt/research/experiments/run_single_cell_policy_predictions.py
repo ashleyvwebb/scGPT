@@ -308,6 +308,12 @@ def run_one_cell(
             pad_token_id=pad_token_id,
         )
 
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(6, 6))
+        plt.hist(result.target_values, bins=50)
+        plt.savefig(output_dir / expr_name / policy.name / f"cell_{cell_index}_target_hist.png", dpi=200)
+        plt.close()
+
         print("std(pred_values)", np.std(pred_values))
 
         print("target min/max/mean:", tokenized_values.min(), tokenized_values.max(), tokenized_values.mean())
