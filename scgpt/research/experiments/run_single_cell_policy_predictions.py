@@ -303,7 +303,7 @@ def run_one_cell(
         pred_values = run_model_forward(
             model=model,
             gene_ids=tokenized_gene_ids,
-            masked_values=masked_values,
+            masked_values=tokenized_values,
             device=device,
             pad_token_id=pad_token_id,
         )
