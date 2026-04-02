@@ -104,7 +104,7 @@ def preprocess_adata(
         filter_cell_by_counts=False,
         normalize_total=1e4,
         result_normed_key="X_normed",
-        log1p=True,
+        log1p=False,
         result_log1p_key="X_log1p",
         subset_hvg=False,
         hvg_flavor="seurat_v3",
@@ -267,7 +267,7 @@ def run_one_cell(
         pad_token="<pad>",
         pad_value=pad_value,
         append_cls=False,
-        include_zero_gene=False,
+        include_zero_gene=True,
     )
 
     tokenized_gene_ids = prepared["tokenized_gene_ids"]
