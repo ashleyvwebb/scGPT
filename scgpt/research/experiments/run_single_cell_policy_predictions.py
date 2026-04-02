@@ -292,11 +292,14 @@ def run_one_cell(
             valid_mask=valid_mask,
         )
 
+        print("Num masking", masking.mask.sum())
+
         masked_values = apply_mask_to_values(
             values=tokenized_values,
             mask=masking.mask,
             mask_token_value=mask_token_value,
         )
+        print(len(masked_values))
 
         pred_values = run_model_forward(
             model=model,
@@ -305,6 +308,7 @@ def run_one_cell(
             device=device,
             pad_token_id=pad_token_id,
         )
+        print(len(pred_values))
 
         print("target min/max/mean:", tokenized_values.min(), tokenized_values.max(), tokenized_values.mean())
         print("pred min/max/mean:", pred_values.min(), pred_values.max(), pred_values.mean())
