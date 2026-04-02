@@ -354,7 +354,7 @@ def pad_batch(
 
     for i in range(len(batch)):
         gene_ids, values, mod_types = batch[i]
-        print(len(gene_ids))
+        print(len(gene_ids), " ", max_len)
 
         if len(gene_ids) > max_len:
             # sample max_len genes
@@ -377,13 +377,14 @@ def pad_batch(
                     ),
                 ]
             )
+            print("len vals:", len(values))
             values = torch.cat(
                 [
                     values,
                     torch.full((max_len - len(values),), pad_value, dtype=values.dtype),
                 ]
             )
-            print(len(values))
+            print("len vals:", len(values))
             if mod_types is not None:
                 mod_types = torch.cat(
                     [
