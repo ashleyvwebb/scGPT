@@ -326,27 +326,27 @@ def run_one_cell(
 
         base = output_dir / expr_name / policy.name /f"cell_{cell_index}"
 
-    #     plot_single_cell_predictions(
-    #         result=result,
-    #         output_path=base.with_suffix(".png"),
-    #         discrete=False,
-    #     )
+        plot_single_cell_predictions(
+            result=result,
+            output_path=base.with_suffix(".png"),
+            discrete=False,
+        )
 
-    #     with base.with_suffix(".json").open("w") as f:
-    #         json.dump(
-    #             {
-    #                 "policy": policy.name,
-    #                 "cell_index": cell_index,
-    #                 "masked_indices": result.masked_indices.tolist(),
-    #                 "gene_names": [result.gene_names[i] for i in result.masked_indices],
-    #                 "target_values": result.target_values[result.masked_indices].tolist(),
-    #                 "predicted_values": result.predicted_values[result.masked_indices].tolist(),
-    #             },
-    #             f,
-    #             indent=2,
-    #         )
+        with base.with_suffix(".json").open("w") as f:
+            json.dump(
+                {
+                    "policy": policy.name,
+                    "cell_index": cell_index,
+                    "masked_indices": result.masked_indices.tolist(),
+                    "gene_names": [result.gene_names[i] for i in result.masked_indices],
+                    "target_values": result.target_values[result.masked_indices].tolist(),
+                    "predicted_values": result.predicted_values[result.masked_indices].tolist(),
+                },
+                f,
+                indent=2,
+            )
 
-    # print(f"Saved outputs to {output_dir}")
+    print(f"Saved outputs to {output_dir}")
 
 
 def parse_args():
