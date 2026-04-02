@@ -162,15 +162,15 @@ def prepare_single_cell_tokenized_input(
         include_zero_gene=include_zero_gene,
     )
 
-    print(tokenized["genes"][0].shape)
-
-    if True:
-        return
-
     # tokenized["genes"] and tokenized["values"] are shape (1, L)
     tokenized_gene_ids = tokenized["genes"][0].detach().cpu().numpy()
     tokenized_values = tokenized["values"][0].detach().cpu().numpy()
 
+    print(tokenized_values.shape)
+
+    if True:
+        return
+    
     stoi = vocab.get_stoi()
     pad_token_id = stoi[pad_token]
 

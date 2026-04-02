@@ -269,9 +269,6 @@ def tokenize_batch(
     Returns:
         list: A list of tuple (gene_id, count) of non zero gene expressions.
     """
-    print("TOKENIZE BATCH")
-    print(data)
-    print(gene_ids)
     if data.shape[1] != len(gene_ids):
         raise ValueError(
             f"Number of features in data ({data.shape[1]}) does not match "
@@ -286,8 +283,6 @@ def tokenize_batch(
     tokenized_data = []
     for i in range(len(data)):
         row = data[i]
-        print(i)
-        print(row)
         mod_types = None
         if include_zero_gene:
             values = row
@@ -296,9 +291,7 @@ def tokenize_batch(
                 mod_types = mod_type
         else:
             idx = np.nonzero(row)[0]
-            print(len(idx))
             values = row[idx]
-            print(values)
             genes = gene_ids[idx]
             if mod_type is not None:
                 mod_types = mod_type[idx]
@@ -313,7 +306,6 @@ def tokenize_batch(
             if mod_type is not None:
                 mod_types = torch.from_numpy(mod_types).long()
         tokenized_data.append((genes, values, mod_types))
-    print(tokenized_data)
     return tokenized_data
 
 
@@ -338,15 +330,10 @@ def pad_batch(
     Returns:
         Dict[str, torch.Tensor]: A dictionary of gene_id and count.
     """
-    print("PADDING")
     max_ori_len = max(len(batch[i][0]) for i in range(len(batch)))
-    print(max_ori_len)
-    print(max_len)
     max_len = min(max_ori_len, max_len)
-    print(max_len)
 
     pad_id = vocab[pad_token]
-    print(pad_id)
     if vocab_mod is not None:
         mod_pad_id = vocab_mod[pad_token]
     gene_ids_list = []
@@ -355,7 +342,6 @@ def pad_batch(
 
     for i in range(len(batch)):
         gene_ids, values, mod_types = batch[i]
-        print(len(gene_ids), " ", max_len)
 
         if len(gene_ids) > max_len:
             # sample max_len genes
@@ -378,14 +364,12 @@ def pad_batch(
                     ),
                 ]
             )
-            print("len vals:", len(values))
             values = torch.cat(
                 [
                     values,
                     torch.full((max_len - len(values),), pad_value, dtype=values.dtype),
                 ]
             )
-            print("len vals:", len(values))
             if mod_types is not None:
                 mod_types = torch.cat(
                     [
