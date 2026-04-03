@@ -222,6 +222,8 @@ def run_model_forward(
         )
         pred = output_dict["mlm_output"]
 
+    print(output_dict.keys())
+
 
     pred = pred.squeeze(0)
     if pred.ndim == 2 and pred.shape[-1] == 1:
@@ -257,7 +259,6 @@ def run_one_cell(
     )
 
     model, vocab = load_model(str(model_dir), device)
-    print(model)
     cancer_gene_set = load_gene_set(cancer_gene_path)
 
     adata = preprocess_adata(adata, n_bins=51)
