@@ -97,11 +97,6 @@ def preprocess_adata(
     if "gene_name" not in adata.var.columns:
         adata.var["gene_name"] = get_gene_names(adata)
 
-
-    print(adata.X)
-    print(adata.obs)
-    print(adata.var)
-
     # Use raw X as input, no HVG selection here.
     preprocessor = Preprocessor(
         use_key="X",
@@ -113,7 +108,7 @@ def preprocess_adata(
         result_log1p_key="X_log1p",
         subset_hvg=False,
         hvg_flavor="seurat_v3",
-        binning=51,
+        binning=n_bins,
         result_binned_key="X_binned",
     )
     preprocessor(adata)
@@ -146,13 +141,19 @@ def prepare_single_cell_tokenized_input(
     )
     genes = adata.var["gene_name"].tolist()
 
+    print(all_counts)
+
     # Keep one cell but preserve 2D shape: (1, G)
     one_cell = np.asarray(all_counts[cell_index : cell_index + 1])
+
+    print(one_cell)
 
     # Keep only genes that exist in vocab
     in_vocab = np.array([g in vocab for g in genes], dtype=bool)
     one_cell = one_cell[:, in_vocab]
     genes = [g for g, keep in zip(genes, in_vocab) if keep]
+
+    print(one_cell)
 
     gene_ids = np.array(vocab(genes), dtype=int)
 
@@ -253,7 +254,6 @@ def run_one_cell(
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(max_files, " ", subset_n_cells)
     adata, _ = load_query_as_adata(
         h5ad_root=h5ad_root,
         query_name=query,
