@@ -333,9 +333,11 @@ def run_one_cell(
         # )
 
         import matplotlib.pyplot as plt
+        output_path = Path(base.with_suffix(".png"))
+        output_path.parent.mkdir(parents=True, exist_ok=True)
         plt.figure(figsize=(6, 6))
         plt.hist(tokenized_values, bins=50)
-        plt.savefig(base.with_suffix(".png"), dpi=200)
+        plt.savefig(output_path, dpi=200)
         plt.close()
 
         with base.with_suffix(".json").open("w") as f:
