@@ -98,7 +98,7 @@ def preprocess_adata(
         adata.var["gene_name"] = get_gene_names(adata)
 
 
-    print(adata["X"])
+    print(adata.X)
 
     # Use raw X as input, no HVG selection here.
     preprocessor = Preprocessor(
