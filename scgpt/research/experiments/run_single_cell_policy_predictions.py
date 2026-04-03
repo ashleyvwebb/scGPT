@@ -146,14 +146,15 @@ def prepare_single_cell_tokenized_input(
     # Keep one cell but preserve 2D shape: (1, G)
     one_cell = np.asarray(all_counts[cell_index : cell_index + 1])
 
-    print(one_cell)
+    print(len(one_cell[0]))
 
     # Keep only genes that exist in vocab
     in_vocab = np.array([g in vocab for g in genes], dtype=bool)
     one_cell = one_cell[:, in_vocab]
     genes = [g for g, keep in zip(genes, in_vocab) if keep]
 
-    print(one_cell)
+    print(len(one_cell[0]))
+    print(one_cell[0].unique())
 
     gene_ids = np.array(vocab(genes), dtype=int)
 
