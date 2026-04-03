@@ -14,10 +14,6 @@
 
 
 echo "Starting job $SLURM_JOB_ID"
-echo "Running on $(hostname)"
-
-# Move to project dir
-cd /springbrook/share/bioinf/csuxfw/scGPT/
 
 # Run training
 python -m scgpt.research.training.train_scgpt_two_stage
