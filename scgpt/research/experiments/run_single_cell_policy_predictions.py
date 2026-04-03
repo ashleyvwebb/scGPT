@@ -307,7 +307,6 @@ def run_one_cell(
 
         print("target min/max/mean:", tokenized_values.min(), tokenized_values.max(), tokenized_values.mean())
         print("pred min/max/mean:", pred_values.min(), pred_values.max(), pred_values.mean())
-        print("fraction target==0 on masked:", np.mean(tokenized_values[masking.masked_indices] == 0))
 
         result = SingleCellPredictionResult(
             gene_names=list(tokenized_gene_names),
