@@ -16,6 +16,6 @@
 echo "Starting job $SLURM_JOB_ID"
 
 # Run training
-python -m scgpt.research.training.train_scgpt_two_stage
+python -m scgpt.research.training.train_two_stage
 
 echo "Finished job"
