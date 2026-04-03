@@ -5,6 +5,7 @@
 #SBATCH --cpus-per-task=6
 #SBATCH --mem-per-cpu=5960
 #SBATCH --time=18:00:00
+#SBATCH --partition=gpu
 #SBATCH --gres=gpu:lovelace_l40:1
 #SBATCH --output=logs/train_%j.out
 #SBATCH --error=logs/train_%j.err
