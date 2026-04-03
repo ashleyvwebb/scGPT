@@ -97,6 +97,9 @@ def preprocess_adata(
     if "gene_name" not in adata.var.columns:
         adata.var["gene_name"] = get_gene_names(adata)
 
+
+    print(adata["X"])
+
     # Use raw X as input, no HVG selection here.
     preprocessor = Preprocessor(
         use_key="X",
@@ -108,7 +111,7 @@ def preprocess_adata(
         result_log1p_key="X_log1p",
         subset_hvg=False,
         hvg_flavor="seurat_v3",
-        binning=n_bins,
+        binning=51,
         result_binned_key="X_binned",
     )
     preprocessor(adata)
@@ -273,7 +276,7 @@ def run_one_cell(
     )
 
     tokenized_gene_ids = prepared["tokenized_gene_ids"]
-    tokenized_values = prepared["tokenized_values"]
+    tokenized_values = prepared["tokenized_values"] / 50.0
     tokenized_gene_names = prepared["tokenized_gene_names"]
     valid_mask = prepared["valid_mask"]
     pad_token_id = prepared["pad_token_id"]
