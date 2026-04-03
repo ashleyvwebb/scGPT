@@ -108,7 +108,7 @@ def preprocess_adata(
         result_log1p_key="X_log1p",
         subset_hvg=False,
         hvg_flavor="seurat_v3",
-        binning=None,
+        binning=n_bins,
         result_binned_key="X_binned",
     )
     preprocessor(adata)
@@ -128,22 +128,17 @@ def prepare_single_cell_tokenized_input(
     """
     Preprocess and tokenize one cell so the model sees shape (1, L), not raw (G,).
     """
-    # if "X_binned" not in adata.layers:
-    #     raise ValueError("adata.layers['X_binned'] not found. Run preprocessing first.")
+    if "X_binned" not in adata.layers:
+        raise ValueError("adata.layers['X_binned'] not found. Run preprocessing first.")
 
     if "gene_name" not in adata.var.columns:
         raise ValueError("adata.var['gene_name'] not found.")
 
     all_counts = (
-        adata.layers["X_log1p"].toarray()
-        if issparse(adata.layers["X_log1p"])
-        else adata.layers["X_log1p"]
+        adata.layers["X_binned"].toarray()
+        if issparse(adata.layers["X_binned"])
+        else adata.layers["X_binned"]
     )
-    # all_counts = (
-    #     adata.layers["X_binned"].toarray()
-    #     if issparse(adata.layers["X_binned"])
-    #     else adata.layers["X_binned"]
-    # )
     genes = adata.var["gene_name"].tolist()
 
     # Keep one cell but preserve 2D shape: (1, G)
