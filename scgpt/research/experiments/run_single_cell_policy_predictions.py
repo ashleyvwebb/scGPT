@@ -99,6 +99,8 @@ def preprocess_adata(
 
 
     print(adata.X)
+    print(adata.obs)
+    print(adata.var)
 
     # Use raw X as input, no HVG selection here.
     preprocessor = Preprocessor(
@@ -251,6 +253,7 @@ def run_one_cell(
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    print(max_files, " ", subset_n_cells)
     adata, _ = load_query_as_adata(
         h5ad_root=h5ad_root,
         query_name=query,
