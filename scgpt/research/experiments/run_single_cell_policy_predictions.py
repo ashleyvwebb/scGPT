@@ -37,12 +37,6 @@ def build_policies(cancer_gene_set: set[str]):
             cancer_weight=5.0,
             non_cancer_weight=1.0,
         ),
-        ValueAwareCancerWeightedMaskingPolicy(
-            cancer_gene_set,
-            cancer_weight=5.0,
-            non_cancer_weight=1.0,
-            value_power=0.5,
-        ),
     ]
 
 
@@ -280,18 +274,21 @@ def run_one_cell(
     policies = build_policies(cancer_gene_set)
 
     for policy in policies:
-        rng = np.random.default_rng(0)
 
         masking = policy.sample_mask(
             gene_names=tokenized_gene_names,
             values=tokenized_values,
             mask_ratio=mask_ratio,
-            rng=rng,
             valid_mask=valid_mask,
         )
         print("=" * 80)
         print(policy.name)
         print("Num masking", masking.mask.sum())
+        print("Mask mean", masking.mask.mean())
+
+        masked_genes = [tokenized_gene_names[i] for i in masking.masked_indices]
+        cancer_frac = sum(g in cancer_gene_set for g in masked_genes) / len(masked_genes)
+        print(cancer_frac)
 
         masked_values = apply_mask_to_values(
             values=tokenized_values,

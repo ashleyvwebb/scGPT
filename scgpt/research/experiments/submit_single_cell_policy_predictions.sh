@@ -18,7 +18,7 @@ OUTPUT_DIR="${PROJECT_ROOT}/research/results/single_cell_policy_predictions/"
 QUERY="lung-cancer"
 MAX_FILES=1
 SUBSET_N_CELLS=10
-MASK_RATIO=0.5
+MASK_RATIO=0.15
 MASK_TOKEN_VALUE=-1
 PAD_VALUE=-2
 
@@ -37,4 +37,4 @@ python -m scgpt.research.experiments.run_single_cell_policy_predictions \
   --pad-value "${PAD_VALUE}" \
   --cell-index "${SLURM_ARRAY_TASK_ID}" \
   --device cpu \
-  --expr-name "mask ratio 0.5"
+  --expr-name "redone masking policies"

@@ -1,129 +1,67 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Sequence
 import numpy as np
-
+import torch
 
 @dataclass
 class MaskingResult:
     mask: np.ndarray              # shape: (n_genes,), dtype=bool
-    probabilities: np.ndarray     # shape: (n_genes,), dtype=float
     masked_indices: np.ndarray    # shape: (k,), dtype=int
 
 
 class MaskingPolicy:
     name: str = "base"
 
-    def get_probabilities(
-        self,
-        gene_names: Sequence[str],
-        values: np.ndarray,
-        valid_mask: np.ndarray | None,
+    def build_probability_matrix(
+            self,
+            gene_names,
+            values,
+            valid_mask,
+            mask_ratio
     ) -> np.ndarray:
         raise NotImplementedError
 
     def sample_mask(
         self,
-        gene_names: Sequence[str],
+        gene_names,
         values: np.ndarray,
         mask_ratio: float,
-        rng: np.random.Generator,
         valid_mask: np.ndarray | None,
-        min_masks: int = 1,
     ) -> MaskingResult:
-        n = len(gene_names)
-        if n == 0:
-            raise ValueError("No genes provided to masking policy.")
 
-        probs = self.get_probabilities(gene_names, values, valid_mask=valid_mask).astype(float)
+        probs = self.build_probability_matrix(gene_names, values, valid_mask, mask_ratio)
 
-        if valid_mask is None:
-            valid_mask = np.ones(n, dtype=bool)
-        else:
-            valid_mask = valid_mask.astype(bool)
+        probs_t = torch.tensor(probs, dtype=torch.float32)
 
-        probs = probs.copy()
-        probs[~valid_mask] = 0.0
-
-        total = probs.sum()
-        if total <= 0:
-            raise ValueError("Masking probabilities sum to zero after applying valid_mask.")
-
-        probs /= total
-
-        k = max(min_masks, int(round(mask_ratio * valid_mask.sum())))
-        k = min(k, int(valid_mask.sum()))
-
-        valid_indices = np.where(valid_mask)[0]
-        chosen = rng.choice(valid_indices, size=k, replace=False, p=probs[valid_indices] / probs[valid_indices].sum())
-
-        mask = np.zeros(n, dtype=bool)
-        mask[chosen] = True
+        mask = torch.bernoulli(probs_t).bool().cpu().numpy()
 
         return MaskingResult(
             mask=mask,
-            probabilities=probs,
-            masked_indices=np.sort(chosen),
+            masked_indices=np.where(mask)[0],
         )
+    
 
 class UniformMaskingPolicy(MaskingPolicy):
     name = "uniform"
 
-    def get_probabilities(
-        self,
-        gene_names,
-        values: np.ndarray,
-        valid_mask: np.ndarray | None,
+    def build_probability_matrix(
+            self,
+            gene_names,
+            values,
+            valid_mask,
+            mask_ratio
     ) -> np.ndarray:
-        n = len(values)
-        probs = np.ones(n, dtype=float)
-        if valid_mask is not None:
-            probs[~valid_mask.astype(bool)] = 0.0
-        return probs
+        probs = np.zeros_like(values, dtype=float)
 
-    def sample_mask(
-        self,
-        gene_names,
-        values: np.ndarray,
-        mask_ratio: float,
-        rng: np.random.Generator,
-        valid_mask: np.ndarray | None,
-        min_masks: int = 1,  # ignored here to match scGPT
-    ) -> MaskingResult:
-        n = len(values)
-        if n == 0:
-            raise ValueError("No genes provided to masking policy.")
+        valid_indicies = np.where(valid_mask)[0]
 
-        if valid_mask is None:
-            valid_mask = np.ones(n, dtype=bool)
-        else:
-            valid_mask = valid_mask.astype(bool)
+        if len(valid_indicies) == 0:
+            return probs
+        
+        probs[valid_indicies] = mask_ratio
 
-        valid_indices = np.where(valid_mask)[0]
+        return np.clip(probs, 0, 1)
 
-        # Match scGPT random_mask_value exactly: floor, no forced minimum
-        k = int(len(valid_indices) * mask_ratio)
-
-        if k == 0:
-            chosen = np.array([], dtype=int)
-        else:
-            chosen = rng.choice(valid_indices, size=k, replace=False)
-
-        mask = np.zeros(n, dtype=bool)
-        mask[chosen] = True
-
-        probs = np.zeros(n, dtype=float)
-        if len(valid_indices) > 0:
-            probs[valid_indices] = 1.0 / len(valid_indices)
-
-        return MaskingResult(
-            mask=mask,
-            probabilities=probs,
-            masked_indices=np.sort(chosen),
-        )
-
-
+    
 class CancerWeightedMaskingPolicy(MaskingPolicy):
     name = "cancer_weighted"
 
@@ -132,64 +70,44 @@ class CancerWeightedMaskingPolicy(MaskingPolicy):
         cancer_gene_set: set[str],
         cancer_weight: float = 5.0,
         non_cancer_weight: float = 1.0,
-        uppercase: bool = True,
     ):
         if cancer_weight <= 0 or non_cancer_weight <= 0:
             raise ValueError("Weights must be positive.")
         self.cancer_gene_set = cancer_gene_set
         self.cancer_weight = cancer_weight
         self.non_cancer_weight = non_cancer_weight
-        self.uppercase = uppercase
 
-    def _normalise(self, gene: str) -> str:
-        return gene.upper() if self.uppercase else gene
-
-    def get_probabilities(
-        self,
-        gene_names: Sequence[str],
-        values: np.ndarray,
-        valid_mask: np.ndarray | None = None,
+    def build_probability_matrix(
+            self,
+            gene_names,
+            values,
+            valid_mask,
+            mask_ratio
     ) -> np.ndarray:
-        probs = np.array(
-            [
-                self.cancer_weight if self._normalise(g) in self.cancer_gene_set else self.non_cancer_weight
-                for g in gene_names
-            ],
-            dtype=float,
-        )
-        if valid_mask is not None:
-            probs[~valid_mask.astype(bool)] = 0.0
-        return probs
+        probs = np.zeros_like(values, dtype=float)
 
+        valid_indicies = np.where(valid_mask)[0]
 
-class ValueAwareCancerWeightedMaskingPolicy(CancerWeightedMaskingPolicy):
-    name = "value_aware_cancer_weighted"
+        if len(valid_indicies) == 0:
+            return probs
+        
+        weights = np.zeros_like(values, dtype=float)
 
-    def __init__(
-        self,
-        cancer_gene_set: set[str],
-        cancer_weight: float = 5.0,
-        non_cancer_weight: float = 1.0,
-        value_power: float = 0.5,
-        uppercase: bool = True,
-    ):
-        super().__init__(
-            cancer_gene_set=cancer_gene_set,
-            cancer_weight=cancer_weight,
-            non_cancer_weight=non_cancer_weight,
-            uppercase=uppercase,
-        )
-        self.value_power = value_power
+        for i in valid_indicies:
+            gene = gene_names[i]
 
-    def get_probabilities(
-        self,
-        gene_names: Sequence[str],
-        values: np.ndarray,
-        valid_mask: np.ndarray | None = None,
-    ) -> np.ndarray:
-        base = super().get_probabilities(gene_names, values, valid_mask=valid_mask)
-        value_scale = np.power(np.clip(values, a_min=0.0, a_max=None) + 1.0, self.value_power)
-        probs = base * value_scale
-        if valid_mask is not None:
-            probs[~valid_mask.astype(bool)] = 0.0
-        return probs
+            if gene in self.cancer_gene_set:
+                weights[i] = self.cancer_weight
+            else:
+                weights[i] = self.non_cancer_weight
+        
+        weights_sum = weights.sum()
+
+        if weights_sum == 0:
+            return probs
+        
+        probs = weights / weights_sum
+
+        probs = probs * (mask_ratio * len(valid_indicies))
+
+        return np.clip(probs, 0, 1)
