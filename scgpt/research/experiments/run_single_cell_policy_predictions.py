@@ -257,6 +257,7 @@ def run_one_cell(
     )
 
     model, vocab = load_model(str(model_dir), device)
+    print(model)
     cancer_gene_set = load_gene_set(cancer_gene_path)
 
     adata = preprocess_adata(adata, n_bins=51)
@@ -273,7 +274,7 @@ def run_one_cell(
     )
 
     tokenized_gene_ids = prepared["tokenized_gene_ids"]
-    tokenized_values = prepared["tokenized_values"] / 50.0
+    tokenized_values = prepared["tokenized_values"]
     tokenized_gene_names = prepared["tokenized_gene_names"]
     valid_mask = prepared["valid_mask"]
     pad_token_id = prepared["pad_token_id"]
