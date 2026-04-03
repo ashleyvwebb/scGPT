@@ -308,12 +308,6 @@ def run_one_cell(
             pad_token_id=pad_token_id,
         )
 
-        import matplotlib.pyplot as plt
-        plt.figure(figsize=(6, 6))
-        plt.hist(tokenized_values, bins=50)
-        plt.savefig(output_dir / expr_name / policy.name / f"cell_{cell_index}_target_hist.png", dpi=200)
-        plt.close()
-
         print("std(pred_values)", np.std(pred_values))
 
         print("target min/max/mean:", tokenized_values.min(), tokenized_values.max(), tokenized_values.mean())
@@ -337,6 +331,12 @@ def run_one_cell(
             output_path=base.with_suffix(".png"),
             discrete=False,
         )
+
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(6, 6))
+        plt.hist(tokenized_values, bins=50)
+        plt.savefig(base.with_suffix("_target_hist.png"), dpi=200)
+        plt.close()
 
         with base.with_suffix(".json").open("w") as f:
             json.dump(
