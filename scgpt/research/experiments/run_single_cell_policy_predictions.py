@@ -14,7 +14,6 @@ from scgpt.research.masking.cancer_gene_sets import load_gene_set
 from scgpt.research.masking.policies import (
     UniformMaskingPolicy,
     CancerWeightedMaskingPolicy,
-    ValueAwareCancerWeightedMaskingPolicy,
 )
 from scgpt.research.experiments.common_prediction import (
     SingleCellPredictionResult,
