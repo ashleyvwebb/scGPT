@@ -82,8 +82,8 @@ def load_model(model_dir):
     vocab = GeneVocab.from_file(model_dir / "vocab.json")
 
     model = TransformerModel(
-        len(vocab),
-        embsize=512,
+        ntoken=len(vocab),
+        d_model=512,
         nhead=8,
         d_hid=512,
         nlayers=12,
