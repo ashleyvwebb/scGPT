@@ -108,7 +108,7 @@ def preprocess_adata(
         result_log1p_key="X_log1p",
         subset_hvg=False,
         hvg_flavor="seurat_v3",
-        binning=n_bins,
+        binning=None,
         result_binned_key="X_binned",
     )
     preprocessor(adata)
@@ -303,7 +303,7 @@ def run_one_cell(
         pred_values = run_model_forward(
             model=model,
             gene_ids=tokenized_gene_ids,
-            masked_values=tokenized_values,
+            masked_values=masked_values,
             device=device,
             pad_token_id=pad_token_id,
         )
@@ -326,19 +326,11 @@ def run_one_cell(
 
         base = output_dir / expr_name / policy.name /f"cell_{cell_index}"
 
-        # plot_single_cell_predictions(
-        #     result=result,
-        #     output_path=base.with_suffix(".png"),
-        #     discrete=False,
-        # )
-
-        import matplotlib.pyplot as plt
-        output_path = Path(base.with_suffix(".png"))
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        plt.figure(figsize=(6, 6))
-        plt.hist(tokenized_values, bins=50)
-        plt.savefig(output_path, dpi=200)
-        plt.close()
+        plot_single_cell_predictions(
+            result=result,
+            output_path=base.with_suffix(".png"),
+            discrete=False,
+        )
 
         with base.with_suffix(".json").open("w") as f:
             json.dump(
