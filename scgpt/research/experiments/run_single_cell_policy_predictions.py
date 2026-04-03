@@ -222,9 +222,6 @@ def run_model_forward(
         )
         pred = output_dict["mlm_output"]
 
-    print(output_dict.keys())
-
-
     pred = pred.squeeze(0)
     if pred.ndim == 2 and pred.shape[-1] == 1:
         pred = pred.squeeze(-1)
