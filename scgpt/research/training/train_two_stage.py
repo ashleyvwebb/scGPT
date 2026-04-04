@@ -158,6 +158,11 @@ def tokenize_dataset(adata, vocab):
         include_zero_gene=False,
     )
 
+    print("X shape after vocab filter:", X.shape)
+    print("Num genes kept:", len(genes))
+    print("Example gene names:", genes[:10])
+    print("Min non-pad tokens per cell:", np.min((tokenized["values"] != PAD_VALUE).sum(axis=1)))
+
     return (
         tokenized["genes"].cpu().numpy(),
         tokenized["values"].cpu().numpy(),
