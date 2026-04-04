@@ -111,9 +111,10 @@ def load_processed_dataset(root):
         print()
         print(adatas[-1].var)
 
-    adata = ad.concat(adatas)
+    adata = ad.concat(adatas, join='outer')
     print()
     print(adata)
+    print(adata.var)
     return adata
 
 
