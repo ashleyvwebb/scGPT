@@ -42,7 +42,6 @@ def process_query(query):
     )
 
     print(f"Loaded {adata.n_obs} cells")
-    print(adata.var.keys())
 
     train, test = split_dataset(
         adata,
@@ -50,9 +49,6 @@ def process_query(query):
         TEST_PER_QUERY,
         SEED,
     )
-
-    print(test)
-    print(train)
 
     query_dir = OUTPUT_DIR / query
     query_dir.mkdir(parents=True, exist_ok=True)

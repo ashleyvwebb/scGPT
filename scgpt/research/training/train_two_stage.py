@@ -108,7 +108,7 @@ def load_processed_dataset(root):
         path = root / q / "train.h5ad"
         print(f"Loading {path}")
         adatas.append(ad.read_h5ad(path))
-
+    print(adatas)
     adata = ad.concat(adatas)
     return adata
 
