@@ -5,4 +5,4 @@
 #SBATCH --mem-per-cpu=4591
 #SBATCH --time=00:00:05
 
-python -m scgpt.research.training.build_train_test_dataset
+python -m scgpt.research.data.build_train_test_dataset

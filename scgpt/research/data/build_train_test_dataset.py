@@ -8,7 +8,7 @@ from scgpt.research.data.cxg_loader import load_query_as_adata
 # CONFIG
 # -----------------------------
 H5AD_ROOT = "scgpt/research/data/cellxgene/h5ad"
-OUTPUT_DIR = Path("scgpt/research/training/dataset")
+OUTPUT_DIR = Path("scgpt/research/data/dataset")
 
 QUERIES = ["blood", "lung", "blood-cancer", "lung-cancer"]
 
