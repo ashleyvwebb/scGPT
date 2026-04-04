@@ -58,10 +58,24 @@ def process_query(query):
 
     print(f"{query}: train={train.n_obs}, test={test.n_obs}")
 
+    return test, train
+
 
 def main():
+    test_adatas = []
+    train_adatas = []
+
     for q in QUERIES:
-        process_query(q)
+        test, train = process_query(q)
+        
+        test_adatas.append(test)
+        train_adatas.append(train)
+
+    test_data = ad.concat(test_adatas, merge='same')
+    train_data = ad.concat(train_adatas, merge='same')
+
+    test_data.write_h5ad(OUTPUT_DIR / "test.h5ad")
+    train_data.write_h5ad(OUTPUT_DIR / "train.h5ad")
 
     print("Done")
 

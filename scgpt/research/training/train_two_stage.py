@@ -40,7 +40,7 @@ MAX_SEQ_LEN = 1200
 
 # paths
 MODEL_DIR = Path("scgpt/research/pretrained_models/whole_human")
-DATASET_ROOT = Path("scgpt/research/training/dataset")
+DATASET_ROOT = Path("scgpt/research/data/dataset")
 OUTPUT_DIR = Path("scgpt/research/training/models")
 
 
