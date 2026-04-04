@@ -146,16 +146,9 @@ def tokenize_dataset(adata, vocab):
 
     genes = adata.var["gene_name"].tolist()
 
-    print("DATASET genes:", genes[:20])
-
-    print("VOCAB genes:", list(vocab.get_stoi().keys())[:20])
-
     in_vocab = np.array([g in vocab for g in genes])
-    print(in_vocab.sum())
-    print("X shape before vocab filter:", X.shape)
     X = X[:, in_vocab]
     genes = [g for g, keep in zip(genes, in_vocab) if keep]
-    print("genes", genes)
 
     gene_ids = np.array(vocab(genes))
 
@@ -202,7 +195,10 @@ def train(
         perm = np.random.permutation(N)
         total_loss = 0
 
+        print("STARTING EPOCH", epoch)
+
         for i in range(0, N, BATCH_SIZE):
+            print("STARTING BATCH", i)
             idx = perm[i:i+BATCH_SIZE]
 
             g = torch.tensor(gene_ids[idx]).to(DEVICE)
@@ -259,13 +255,17 @@ def train(
 def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+    print("LOADING MODEL")
     model, vocab = load_model(MODEL_DIR)
     optimizer = AdamW(model.parameters(), lr=LR)
 
     # load dataset
+    print("LOADING DATASET")
     adata = load_processed_dataset(DATASET_ROOT)
+    print("PREPROCESSING DATASET")
     adata = preprocess(adata)
 
+    print("TOKENIZING DATASET")
     gene_ids, values, gene_names = tokenize_dataset(adata, vocab)
     pad_token_id = vocab["<pad>"]
 
@@ -274,6 +274,7 @@ def main():
     # -----------------------------
     uniform_policy = UniformMaskingPolicy()
 
+    print("STARTING TRAINING -- UNIFORM")
     train(
         model,
         gene_ids,
@@ -286,6 +287,7 @@ def main():
         "Uniform",
     )
 
+    print("SAVING TRAINING -- UNIFORM")
     save_checkpoint(model, vocab, "stage1_uniform")
 
     # -----------------------------
@@ -298,6 +300,7 @@ def main():
         cancer_weight=5.0,
     )
 
+    print("STARTING TRAINING -- CANCER WEIGHTED")
     train(
         model,
         gene_ids,
@@ -310,6 +313,7 @@ def main():
         "Cancer",
     )
 
+    print("SAVING TRAINING -- CANCER WEIGHTED")
     save_checkpoint(model, vocab, "stage2_cancer")
 
 
