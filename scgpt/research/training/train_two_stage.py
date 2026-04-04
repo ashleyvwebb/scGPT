@@ -55,7 +55,7 @@ def save_checkpoint(model, vocab, stage_name):
     torch.save(model.state_dict(), save_dir / "model.pt")
 
     # vocab
-    vocab.save(save_dir / "vocab.json")
+    vocab.save_json(save_dir / "vocab.json")
 
     # config (CRITICAL)
     config = {
@@ -108,13 +108,8 @@ def load_processed_dataset(root):
         path = root / q / "train.h5ad"
         print(f"Loading {path}")
         adatas.append(ad.read_h5ad(path))
-        print()
-        print(adatas[-1].var)
 
     adata = ad.concat(adatas, merge='same')
-    print()
-    print(adata)
-    print(adata.var)
     return adata
 
 
@@ -162,10 +157,6 @@ def tokenize_dataset(adata, vocab):
         append_cls=False,
         include_zero_gene=False,
     )
-
-    print("X shape after vocab filter:", X.shape)
-    print("Num genes kept:", len(genes))
-    print("Example gene names:", genes[:10])
 
     return (
         tokenized["genes"].cpu().numpy(),
