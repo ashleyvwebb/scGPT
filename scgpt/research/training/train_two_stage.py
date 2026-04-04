@@ -110,6 +110,8 @@ def load_processed_dataset(root):
         adatas.append(ad.read_h5ad(path))
     print(adatas)
     adata = ad.concat(adatas)
+    print()
+    print(adata)
     return adata
 
 
