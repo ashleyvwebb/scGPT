@@ -1,0 +1,10 @@
+{
+  "pad_value": -2,
+  "mask_value": -1,
+  "mask_ratio": 0.3,
+  "max_seq_len": 1200,
+  "input_style": "binned",
+  "normalize_total": 10000.0,
+  "log1p": true,
+  "binning": 51
+}
