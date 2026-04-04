@@ -139,7 +139,7 @@ def tokenize_dataset(adata, vocab):
     if hasattr(X, "toarray"):
         X = X.toarray()
 
-    genes = adata.var.keys()
+    genes = adata.var["gene_name"].tolist()
 
     print("DATASET genes:", genes[:20])
 
