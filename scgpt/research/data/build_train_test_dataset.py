@@ -67,7 +67,7 @@ def main():
 
     for q in QUERIES:
         test, train = process_query(q)
-        
+
         test_adatas.append(test)
         train_adatas.append(train)
 
