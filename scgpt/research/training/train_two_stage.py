@@ -102,15 +102,11 @@ def load_model(model_dir):
 # LOAD PROCESSED DATASET
 # -----------------------------
 def load_processed_dataset(root):
-    adatas = []
 
-    for q in ["blood", "lung", "blood-cancer", "lung-cancer"]:
-        path = root / q / "train.h5ad"
-        print(f"Loading {path}")
-        adatas.append(ad.read_h5ad(path))
-
-    adata = ad.concat(adatas, merge='same')
-    return adata
+    path = root / "train.h5ad"
+    print(f"Loading {path}")
+    
+    return ad.read_h5ad(path)
 
 
 # -----------------------------
