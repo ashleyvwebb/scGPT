@@ -109,12 +109,12 @@ def load_processed_dataset(root):
         print(f"Loading {path}")
         adatas.append(ad.read_h5ad(path))
         print()
-        print(adatas[-1].var)
+        print(adatas[-1].var_names)
 
-    adata = ad.concat(adatas, join='outer')
+    adata = ad.concat(adatas)
     print()
     print(adata)
-    print(adata.var)
+    print(adata.var_names)
     return adata
 
 
