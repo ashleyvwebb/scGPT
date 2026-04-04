@@ -143,7 +143,8 @@ def tokenize_dataset(adata, vocab):
 
     print("DATASET genes:", genes[:20])
 
-    print("VOCAB genes:", list(vocab.token_to_idx.keys())[:20])
+    print("VOCAB genes:", list(vocab.get_stoi().keys())[:20])
+
     in_vocab = np.array([g in vocab for g in genes])
     print(in_vocab.sum())
     print("X shape before vocab filter:", X.shape)
