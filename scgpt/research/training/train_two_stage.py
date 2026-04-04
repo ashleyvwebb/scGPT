@@ -284,7 +284,7 @@ def main():
     # -----------------------------
     # STAGE 2: CANCER
     # -----------------------------
-    cancer_genes = load_gene_set("path/to/cancer_list.txt")
+    cancer_genes = load_gene_set("scgpt/research/data/cancer_genes/cancer_gene_list.txt")
 
     cancer_policy = CancerWeightedMaskingPolicy(
         cancer_genes,
