@@ -71,8 +71,8 @@ def main():
         test_adatas.append(test)
         train_adatas.append(train)
 
-    test_data = ad.concat(test_adatas, merge='same')
-    train_data = ad.concat(train_adatas, merge='same')
+    test_data = ad.concat(test_adatas, merge='same', label="batch", keys=QUERIES)
+    train_data = ad.concat(train_adatas, merge='same', label="batch", keys=QUERIES)
 
     test_data.write_h5ad(OUTPUT_DIR / "test.h5ad")
     train_data.write_h5ad(OUTPUT_DIR / "train.h5ad")
