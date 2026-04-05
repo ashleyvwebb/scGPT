@@ -52,12 +52,12 @@ class UniformMaskingPolicy(MaskingPolicy):
     ) -> np.ndarray:
         probs = np.zeros_like(values, dtype=float)
 
-        valid_indicies = np.where(valid_mask)[0]
+        valid_indices = np.where(valid_mask)[0]
 
-        if len(valid_indicies) == 0:
+        if len(valid_indices) == 0:
             return probs
         
-        probs[valid_indicies] = mask_ratio
+        probs[valid_indices] = mask_ratio
 
         return np.clip(probs, 0, 1)
 
@@ -86,14 +86,14 @@ class CancerWeightedMaskingPolicy(MaskingPolicy):
     ) -> np.ndarray:
         probs = np.zeros_like(values, dtype=float)
 
-        valid_indicies = np.where(valid_mask)[0]
+        valid_indices = np.where(valid_mask)[0]
 
-        if len(valid_indicies) == 0:
+        if len(valid_indices) == 0:
             return probs
         
         weights = np.zeros_like(values, dtype=float)
 
-        for i in valid_indicies:
+        for i in valid_indices:
             gene = gene_names[i]
 
             if gene in self.cancer_gene_set:
@@ -108,7 +108,7 @@ class CancerWeightedMaskingPolicy(MaskingPolicy):
         
         probs = weights / weights_sum
 
-        probs = probs * (mask_ratio * len(valid_indicies))
+        probs = probs * (mask_ratio * len(valid_indices))
 
         return np.clip(probs, 0, 1)
 
@@ -127,20 +127,20 @@ class HVGMaskingPolicy(MaskingPolicy):
     ) -> np.ndarray:
         probs = np.zeros_like(values, dtype=float)
 
-        valid_indicies = np.where(valid_mask)[0]
+        valid_indices = np.where(valid_mask)[0]
 
-        if len(valid_indicies) == 0:
+        if len(valid_indices) == 0:
             return probs
         
-        hvg_indicies = [
-            i for i in valid_indicies
+        hvg_indices = [
+            i for i in valid_indices
             if gene_names[i] in self.hvg_gene_set
         ]
 
-        if len(hvg_indicies) == 0:
+        if len(hvg_indices) == 0:
             return probs
         
         # This could be changed to mask_ratio, but for the case of our experiments we want to mask all the HVG genes not only a fraction of them
-        probs[hvg_indicies] = 1
+        probs[hvg_indices] = 1
 
         return np.clip(probs, 0, 1)

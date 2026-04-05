@@ -303,8 +303,8 @@ def run_one_batch(
             )
 
             batch_results[policy.name].append({
-                "targets": values[masking.masked_indicies].tolist(),
-                "preds": pred[masking.masked_indicies].tolist()
+                "targets": values[masking.masked_indices].tolist(),
+                "preds": pred[masking.masked_indices].tolist()
             })
 
     for policy, results in batch_results.items():

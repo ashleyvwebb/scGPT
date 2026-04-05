@@ -60,7 +60,7 @@ def load_hvg_mask(adata, hvg_file):
 
     Returns:
         hvg_mask: np.ndarray (bool)
-        hvg_indicies: np.ndarray (int)
+        hvg_indices: np.ndarray (int)
     """
     hvg_genes = pd.read_csv(hvg_file, header=None)[0].astype(str).values
     
@@ -70,6 +70,6 @@ def load_hvg_mask(adata, hvg_file):
 
     hvg_mask = np.array([g in hvg_set for g in gene_names])
 
-    hvg_indicies = np.where(hvg_mask)[0]
+    hvg_indices = np.where(hvg_mask)[0]
 
-    return hvg_mask, hvg_indicies
+    return hvg_mask, hvg_indices
