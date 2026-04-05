@@ -1,6 +1,7 @@
 import scanpy as sc
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 NUM_HVG = 50
 DATASET_PATH = "scgpt/research/data/dataset/train.h5ad"
@@ -21,7 +22,9 @@ hvg_genes = adata.var.loc[hvg_mask, "feature_name"].astype(str)
 hvg_genes.to_csv("scgpt/research/data/HVGs/train_hvg_genes.txt", index=False, header=False)
 
 # Plot HVGs
-sc.pl.highly_variable_genes(adata, save=True)
+sc.pl.highly_variable_genes(adata, show=False)
+plt.savefig("scgpt/research/data/HVGs/hvg_plot.png", dpi=300)
+plt.close()
 
 
 def load_hvg_mask(adata, hvg_file):
@@ -36,7 +39,7 @@ def load_hvg_mask(adata, hvg_file):
         hvg_mask: np.ndarray (bool)
         hvg_indicies: np.ndarray (int)
     """
-    hvg_genes = pd.reas_csv(hvg_file, header=None)[0].astype(str).values
+    hvg_genes = pd.read_csv(hvg_file, header=None)[0].astype(str).values
     
     gene_names = adata.var["feature_name"].astype(str).values
 
