@@ -35,7 +35,7 @@ pd.Series(hvg_genes).to_csv("scgpt/research/data/HVGs/hvg_genes.txt", index=Fals
 np.save("scgpt/research/data/HVGs/hvg_indicies.npy", hvg_indicies)
 
 # Save annotated AnnData
-adata.write(DATASET_PATH)
+adata.write_h5ad(DATASET_PATH)
 
 # Plot HVGs
 # TODO - look into saving this
