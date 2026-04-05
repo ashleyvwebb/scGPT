@@ -3,7 +3,7 @@ import scanpy as sc
 import numpy as np
 import anndata as ad
 
-def dload_h5ad(path: str | Path) -> ad.AnnData:
+def load_h5ad(path: str | Path) -> ad.AnnData:
     adata = sc.read_h5ad(path)
     adata.var_names_make_unique()
     return adata

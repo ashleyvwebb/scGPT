@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from scipy.sparse import issparse
 
-from scgpt.research.data.cxg_loader import load_query_as_adata
+from scgpt.research.data.cxg_loader import load_h5ad
 from scgpt.research.data.alignment import get_gene_names
 from scgpt.research.masking.cancer_gene_sets import load_gene_set
 from scgpt.research.masking.policies import (
@@ -28,9 +28,28 @@ from scgpt.utils import load_pretrained
 from scgpt.preprocess import Preprocessor
 from scgpt.tokenizer import tokenize_and_pad_batch
 
+# =======
+# CONFIG
+# =======
+PROJECT_ROOT = "/springbrook/share/bioinf/csuxfw/scGPT/scgpt"
+
+H5AD_PATH=f"{PROJECT_ROOT}/research/data/dataset/train.h5ad"
+MODEL_DIR=f"{PROJECT_ROOT}/research/pretrained_models/whole_human"
+CANCER_GENE_PATH=f"{PROJECT_ROOT}/research/data/cancer_genes/cancer_gene_list.txt"
+HVG_GENE_PATH=f"{PROJECT_ROOT}/research/data/HVGs/hvg_genes.txt"
+OUTPUT_DIR=f"{PROJECT_ROOT}/research/results/batched_predictions/"
+
+MASK_RATIO = 0.15
+MASK_TOKEN_VALUE = -1
+PAD_VALUE = -2
+
+DEVICE = "cpu"
+EXPR_NAME = "batched_run_init"
+
 def load_hvg_genes(path):
     with open(path, "r") as f:
         return set(line.strip() for line in f)
+
 
 def build_policies(cancer_gene_set: set[str], hvg_gene_set: set[str]):
     return [
@@ -227,174 +246,87 @@ def run_model_forward(
     return pred.detach().cpu().numpy()
 
 
-def run_one_cell(
-    h5ad_root,
-    query,
-    model_dir,
-    cancer_gene_path,
-    hvg_gene_path,
-    output_dir,
-    cell_index,
-    max_files,
-    subset_n_cells,
-    mask_ratio,
-    mask_token_value,
-    pad_value,
-    device,
-    expr_name
+def run_one_batch(
+    start_idx,
+    end_idx
 ):
-    output_dir = Path(output_dir)
+    output_dir = Path(OUTPUT_DIR)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    adata, _ = load_query_as_adata(
-        h5ad_root=h5ad_root,
-        query_name=query,
-        max_files=max_files,
-        subset_n_cells=subset_n_cells,
-        seed=0,
-    )
+    adata, = load_h5ad(H5AD_PATH)
 
-    model, vocab = load_model(str(model_dir), device)
-    cancer_gene_set = load_gene_set(cancer_gene_path)
-    hvg_gene_set = load_hvg_genes(hvg_gene_path)
-
-    adata = preprocess_adata(adata, n_bins=51)
-
-    prepared = prepare_single_cell_tokenized_input(
-        adata=adata,
-        cell_index=cell_index,
-        vocab=vocab,
-        max_seq_len=1200,
-        pad_token="<pad>",
-        pad_value=pad_value,
-        append_cls=False,
-        include_zero_gene=False,
-    )
-
-    tokenized_gene_ids = prepared["tokenized_gene_ids"]
-    tokenized_values = prepared["tokenized_values"]
-    tokenized_gene_names = prepared["tokenized_gene_names"]
-    valid_mask = prepared["valid_mask"]
-    pad_token_id = prepared["pad_token_id"]
+    model, vocab = load_model(MODEL_DIR, DEVICE)
+    cancer_gene_set = load_gene_set(CANCER_GENE_PATH)
+    hvg_gene_set = load_hvg_genes(HVG_GENE_PATH)
 
     policies = build_policies(cancer_gene_set, hvg_gene_set)
 
-    for policy in policies:
+    adata = preprocess_adata(adata)
 
-        masking = policy.sample_mask(
-            gene_names=tokenized_gene_names,
-            values=tokenized_values,
-            mask_ratio=mask_ratio,
-            valid_mask=valid_mask,
-        )
-        print("=" * 80)
-        print(policy.name)
-        print("Num masking", masking.mask.sum())
-        print("Mask mean", masking.mask.mean())
+    batch_results = {p.name: [] for p in policies}
 
-        masked_genes = [tokenized_gene_names[i] for i in masking.masked_indices]
-        cancer_frac = sum(g in cancer_gene_set for g in masked_genes) / len(masked_genes)
-        print(cancer_frac)
+    for cell_index in range(start_idx, min(end_idx, adata.n_obs)):
 
-        masked_values = apply_mask_to_values(
-            values=tokenized_values,
-            mask=masking.mask,
-            mask_token_value=mask_token_value,
+        prepared = prepare_single_cell_tokenized_input(
+            adata=adata,
+            cell_index=cell_index,
+            vocab=vocab,
         )
 
-        pred_values = run_model_forward(
-            model=model,
-            gene_ids=tokenized_gene_ids,
-            masked_values=masked_values,
-            device=device,
-            pad_token_id=pad_token_id,
-        )
+        gene_ids = prepared["tokenized_gene_ids"]
+        values = prepared["tokenized_values"]
+        names = prepared["tokenized_gene_names"]
+        valid_mask = prepared["valid_mask"]
+        pad_token_id = prepared["pad_token_id"]
 
-        print("std(pred_values)", np.std(pred_values))
+        for policy in policies:
 
-        print("target min/max/mean:", tokenized_values.min(), tokenized_values.max(), tokenized_values.mean())
-        print("pred min/max/mean:", pred_values.min(), pred_values.max(), pred_values.mean())
-
-        result = SingleCellPredictionResult(
-            gene_names=list(tokenized_gene_names),
-            target_values=np.asarray(tokenized_values, dtype=float),
-            predicted_values=np.asarray(pred_values, dtype=float),
-            predicted_bins=None,
-            masked_indices=masking.masked_indices,
-            policy_name=policy.name,
-            cell_id=str(cell_index),
-        )
-
-        base = output_dir / expr_name / policy.name /f"cell_{cell_index}"
-
-        plot_single_cell_predictions(
-            result=result,
-            output_path=base.with_suffix(".png"),
-            discrete=False,
-        )
-
-        with base.with_suffix(".json").open("w") as f:
-            json.dump(
-                {
-                    "policy": policy.name,
-                    "cell_index": cell_index,
-                    "masked_indices": result.masked_indices.tolist(),
-                    "gene_names": [result.gene_names[i] for i in result.masked_indices],
-                    "target_values": result.target_values[result.masked_indices].tolist(),
-                    "predicted_values": result.predicted_values[result.masked_indices].tolist(),
-                },
-                f,
-                indent=2,
+            masking = policy.sample_mask(
+                gene_names=names,
+                values=values,
+                mask_ratio=MASK_RATIO,
+                valid_mask=valid_mask,
             )
 
-    print(f"Saved outputs to {output_dir}")
+            masked_values = apply_mask_to_values(
+                values=values,
+                mask=masking.mask,
+                mask_token_value=MASK_TOKEN_VALUE,
+            )
 
+            pred = run_model_forward(
+                model=model,
+                gene_ids=gene_ids,
+                masked_values=masked_values,
+                device=DEVICE,
+                pad_token_id=pad_token_id,
+            )
+
+            batch_results[policy.name].append({
+                "targets": values[masking.masked_indicies].tolist(),
+                "preds": pred[masking.masked_indicies].tolist()
+            })
+
+    for policy, results in batch_results.items():
+        out = output_dir / EXPR_NAME / policy / f"batch_{start_idx}.json"
+        out.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(out, "w") as f:
+            json.dump(results, f)
 
 def parse_args():
     p = argparse.ArgumentParser()
-    p.add_argument("--h5ad-root", type=Path, required=True)
-    p.add_argument("--query", type=str, required=True)
-    p.add_argument("--model-dir", type=Path, required=True)
-    p.add_argument("--cancer-gene-path", type=Path, required=True)
-    p.add_argument("--hvg-gene-path", type=Path, required=True)
-    p.add_argument("--output-dir", type=Path, required=True)
-    p.add_argument("--cell-index", type=int, default=0)
-    p.add_argument("--max-files", type=int, default=1)
-    p.add_argument("--subset-n-cells", type=int, default=None)
-    p.add_argument("--mask-ratio", type=float, default=0.15)
-    p.add_argument("--mask-token-value", type=float, default=-1)
-    p.add_argument("--pad-value", type=float, default=-2)
-    p.add_argument(
-        "--device",
-        type=str,
-        default="cuda" if torch.cuda.is_available() else "cpu",
-    )
-    p.add_argument(
-        "--expr-name",
-        type=str,
-        default="expr1",
-        help="Name of this experiment, used for organizing output subdirectories.",
-    )
+    p.add_argument("--start-idx", type=int, required=True)
+    p.add_argument("--end-idx", type=int, required=True)
     return p.parse_args()
 
 
 def main():
     args = parse_args()
-    run_one_cell(
-        h5ad_root=args.h5ad_root,
-        query=args.query,
-        model_dir=args.model_dir,
-        cancer_gene_path=args.cancer_gene_path,
-        hvg_gene_path=args.hvg_gene_path,
-        output_dir=args.output_dir,
-        cell_index=args.cell_index,
-        max_files=args.max_files,
-        subset_n_cells=args.subset_n_cells,
-        mask_ratio=args.mask_ratio,
-        mask_token_value=args.mask_token_value,
-        pad_value=args.pad_value,
-        device=args.device,
-        expr_name=args.expr_name
+
+    run_one_batch(
+        start_idx = args.start_idx,
+        end_idx = args.end_idx
     )
 
 
