@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 NUM_HVG = 50
-DATASET_PATH = "scgpt/research/data/dataset/train.h5ad"
+DATASET_PATH = "scgpt/research/data/dataset/test.h5ad"
 
 adata = sc.read_h5ad(DATASET_PATH)
 
