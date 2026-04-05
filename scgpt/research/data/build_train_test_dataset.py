@@ -66,7 +66,12 @@ def main():
     train_adatas = []
 
     for q in QUERIES:
-        test, train = process_query(q)
+        # test, train = process_query(q)
+        path_test = OUTPUT_DIR / q / "test.h5ad"
+        path_train = OUTPUT_DIR / q / "train.h5ad"
+
+        test = ad.read_h5ad(path_test)
+        train = ad.read_h5ad(path_train)
 
         test_adatas.append(test)
         train_adatas.append(train)
