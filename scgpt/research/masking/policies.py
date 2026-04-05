@@ -111,3 +111,36 @@ class CancerWeightedMaskingPolicy(MaskingPolicy):
         probs = probs * (mask_ratio * len(valid_indicies))
 
         return np.clip(probs, 0, 1)
+
+class HVGMaskingPolicy(MaskingPolicy):
+    name = "hvg"
+
+    def __init__(self, hvg_gene_set: set[str]):
+        self.hvg_gene_set = hvg_gene_set
+
+    def build_probability_matrix(
+            self, 
+            gene_names, 
+            values, 
+            valid_mask, 
+            mask_ratio
+    ) -> np.ndarray:
+        probs = np.zeros_like(values, dtype=float)
+
+        valid_indicies = np.where(valid_mask)[0]
+
+        if len(valid_indicies) == 0:
+            return probs
+        
+        hvg_indicies = [
+            i for i in valid_indicies
+            if gene_names[i] in self.hvg_gene_set
+        ]
+
+        if len(hvg_indicies) == 0:
+            return probs
+        
+        # This could be changed to mask_ratio, but for the case of our experiments we want to mask all the HVG genes not only a fraction of them
+        probs[hvg_indicies] = 1
+
+        return np.clip(probs, 0, 1)

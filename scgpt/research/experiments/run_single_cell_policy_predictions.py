@@ -14,6 +14,7 @@ from scgpt.research.masking.cancer_gene_sets import load_gene_set
 from scgpt.research.masking.policies import (
     UniformMaskingPolicy,
     CancerWeightedMaskingPolicy,
+    HVGMaskingPolicy,
 )
 from scgpt.research.experiments.common_prediction import (
     SingleCellPredictionResult,
@@ -27,8 +28,11 @@ from scgpt.utils import load_pretrained
 from scgpt.preprocess import Preprocessor
 from scgpt.tokenizer import tokenize_and_pad_batch
 
+def load_hvg_genes(path):
+    with open(path, "r") as f:
+        return set(line.strip() for line in f)
 
-def build_policies(cancer_gene_set: set[str]):
+def build_policies(cancer_gene_set: set[str], hvg_gene_set: set[str]):
     return [
         UniformMaskingPolicy(),
         CancerWeightedMaskingPolicy(
@@ -36,6 +40,7 @@ def build_policies(cancer_gene_set: set[str]):
             cancer_weight=5.0,
             non_cancer_weight=1.0,
         ),
+        HVGMaskingPolicy(hvg_gene_set)
     ]
 
 
@@ -227,6 +232,7 @@ def run_one_cell(
     query,
     model_dir,
     cancer_gene_path,
+    hvg_gene_path,
     output_dir,
     cell_index,
     max_files,
@@ -250,6 +256,7 @@ def run_one_cell(
 
     model, vocab = load_model(str(model_dir), device)
     cancer_gene_set = load_gene_set(cancer_gene_path)
+    hvg_gene_set = load_hvg_genes(hvg_gene_path)
 
     adata = preprocess_adata(adata, n_bins=51)
 
@@ -270,7 +277,7 @@ def run_one_cell(
     valid_mask = prepared["valid_mask"]
     pad_token_id = prepared["pad_token_id"]
 
-    policies = build_policies(cancer_gene_set)
+    policies = build_policies(cancer_gene_set, hvg_gene_set)
 
     for policy in policies:
 
@@ -349,6 +356,7 @@ def parse_args():
     p.add_argument("--query", type=str, required=True)
     p.add_argument("--model-dir", type=Path, required=True)
     p.add_argument("--cancer-gene-path", type=Path, required=True)
+    p.add_argument("--hvg-gene-path", type=Path, required=True)
     p.add_argument("--output-dir", type=Path, required=True)
     p.add_argument("--cell-index", type=int, default=0)
     p.add_argument("--max-files", type=int, default=1)
@@ -377,6 +385,7 @@ def main():
         query=args.query,
         model_dir=args.model_dir,
         cancer_gene_path=args.cancer_gene_path,
+        hvg_gene_path=args.hvg_gene_path,
         output_dir=args.output_dir,
         cell_index=args.cell_index,
         max_files=args.max_files,

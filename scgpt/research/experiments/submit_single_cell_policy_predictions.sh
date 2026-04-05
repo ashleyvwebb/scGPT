@@ -13,6 +13,7 @@ PROJECT_ROOT="/springbrook/share/bioinf/csuxfw/scGPT/scgpt"
 H5AD_ROOT="${PROJECT_ROOT}/research/data/cellxgene/h5ad"
 MODEL_DIR="${PROJECT_ROOT}/research/pretrained_models/whole_human"
 CANCER_GENE_PATH="${PROJECT_ROOT}/research/data/cancer_genes/cancer_gene_list.txt"
+HVG_GENE_PATH="${PROJECT_ROOT}/research/data/HVGs/hvg_genes.txt"
 OUTPUT_DIR="${PROJECT_ROOT}/research/results/single_cell_policy_predictions/"
 
 QUERY="lung-cancer"
@@ -29,6 +30,7 @@ python -m scgpt.research.experiments.run_single_cell_policy_predictions \
   --query "${QUERY}" \
   --model-dir "${MODEL_DIR}" \
   --cancer-gene-path "${CANCER_GENE_PATH}" \
+  --hvg-gene-path "${HVG_GENE_PATH}" \
   --output-dir "${OUTPUT_DIR}/${QUERY}" \
   --max-files "${MAX_FILES}" \
   --subset-n-cells "${SUBSET_N_CELLS}" \
