@@ -19,11 +19,35 @@ hvg_mask = adata.var["highly_variable"].values
 hvg_genes = adata.var.loc[hvg_mask, "feature_name"].astype(str)
 
 # Save gene names
-hvg_genes.to_csv("scgpt/research/data/HVGs/train_hvg_genes.txt", index=False, header=False)
+hvg_genes.to_csv("scgpt/research/data/HVGs/hvg_genes.txt", index=False, header=False)
 
 # Plot HVGs
-sc.pl.highly_variable_genes(adata, show=False)
-plt.savefig("scgpt/research/data/HVGs/hvg_plot.png", dpi=300)
+# sc.pl.highly_variable_genes(adata, show=False)
+means = adata.var["means"]
+variances = adata.var["variances_norm"]
+
+plt.figure(figsize=(6, 5))
+
+plt.scatter(
+    means[~hvg_mask],
+    variances[~hvg_mask],
+    s=5,
+    c="lightgrey",
+    label="other genes"
+)
+
+plt.scatter(
+    means[hvg_mask],
+    variances[hvg_mask],
+    s=8,
+    c="red",
+    label="highly variable genes"
+)
+
+plt.xlabel("mean expressions of genes")
+plt.ylabel("variances of genes (normalized)")
+plt.legend()
+plt.savefig("scgpt/research/data/HVGs/hvg_plot2.png", dpi=300)
 plt.close()
 
 
