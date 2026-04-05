@@ -253,7 +253,7 @@ def run_one_batch(
     output_dir = Path(OUTPUT_DIR)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    adata, = load_h5ad(H5AD_PATH)
+    adata = load_h5ad(H5AD_PATH)
 
     model, vocab = load_model(MODEL_DIR, DEVICE)
     cancer_gene_set = load_gene_set(CANCER_GENE_PATH)
