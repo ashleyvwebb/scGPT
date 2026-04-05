@@ -30,6 +30,7 @@ def main(base):
         if not policy.is_dir(): continue
         t, p = aggregate(policy)
         plot(t, p, policy / "aggregated.png")
+        print(t)
         plt.hist(t, bins=50)
         plt.title("Target distribution")
         plt.savefig(policy / "target_hist.png")
