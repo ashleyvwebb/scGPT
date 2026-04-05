@@ -21,7 +21,7 @@ hvg_genes = adata.var.loc[hvg_mask, "feature_name"].astype(str)
 hvg_genes.to_csv("scgpt/research/data/HVGs/train_hvg_genes.txt", index=False, header=False)
 
 # Plot HVGs
-sc.pl.highly_variable_genes(adata, save="scgpt/research/data/HVGs/train_hvg_plot.png")
+sc.pl.highly_variable_genes(adata, save=True)
 
 
 def load_hvg_mask(adata, hvg_file):
