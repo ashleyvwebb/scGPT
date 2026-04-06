@@ -8,9 +8,8 @@ def aggregate(policy_dir):
 
     for f in policy_dir.glob("batch_*.json"):
         data = json.load(open(f))
-        for d in data:
-            targets.extend(d["targets"])
-            preds.extend(d["preds"])
+        targets.extend(data["targets"])
+        preds.extend(data["preds"])
     
     return np.array(targets), np.array(preds)
 
