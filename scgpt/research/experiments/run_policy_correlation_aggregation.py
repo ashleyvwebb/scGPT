@@ -30,6 +30,7 @@ def main(base):
         t, p = aggregate(policy)
         plot(t, p, policy / "aggregated.png")
         
+        print()
         print(t)
         plt.hist(t, bins=50)
         plt.title("Target distribution")
