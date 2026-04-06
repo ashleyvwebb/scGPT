@@ -272,6 +272,7 @@ def run_one_batch(
             adata=adata,
             cell_index=cell_index,
             vocab=vocab,
+            include_zero_gene=True,
         )
 
         gene_ids = prepared["tokenized_gene_ids"]
