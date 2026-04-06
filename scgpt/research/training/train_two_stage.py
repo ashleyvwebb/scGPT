@@ -290,39 +290,39 @@ def main():
         gene_names,
         uniform_policy,
         pad_token_id,
-        EPOCHS_STAGE1,
+        6,
         optimizer,
         "Uniform",
     )
 
     print("SAVING TRAINING -- UNIFORM")
-    save_checkpoint(model, vocab, "stage1_uniform")
+    save_checkpoint(model, vocab, "uniform")
 
     # -----------------------------
     # STAGE 2: CANCER
-    # -----------------------------
-    cancer_genes = load_gene_set("scgpt/research/data/cancer_genes/cancer_gene_list.txt")
+    # # -----------------------------
+    # cancer_genes = load_gene_set("scgpt/research/data/cancer_genes/cancer_gene_list.txt")
 
-    cancer_policy = CancerWeightedMaskingPolicy(
-        cancer_genes,
-        cancer_weight=5.0,
-    )
+    # cancer_policy = CancerWeightedMaskingPolicy(
+    #     cancer_genes,
+    #     cancer_weight=5.0,
+    # )
 
-    print("STARTING TRAINING -- CANCER WEIGHTED")
-    train(
-        model,
-        gene_ids,
-        values,
-        gene_names,
-        cancer_policy,
-        pad_token_id,
-        EPOCHS_STAGE2,
-        optimizer,
-        "Cancer",
-    )
+    # print("STARTING TRAINING -- CANCER WEIGHTED")
+    # train(
+    #     model,
+    #     gene_ids,
+    #     values,
+    #     gene_names,
+    #     cancer_policy,
+    #     pad_token_id,
+    #     EPOCHS_STAGE2,
+    #     optimizer,
+    #     "Cancer",
+    # )
 
-    print("SAVING TRAINING -- CANCER WEIGHTED")
-    save_checkpoint(model, vocab, "stage2_cancer")
+    # print("SAVING TRAINING -- CANCER WEIGHTED")
+    # save_checkpoint(model, vocab, "stage2_cancer")
 
 
 if __name__ == "__main__":
