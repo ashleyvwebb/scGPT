@@ -52,7 +52,7 @@ def save_checkpoint(model, vocab, stage_name):
     save_dir.mkdir(parents=True, exist_ok=True)
 
     # model weights
-    torch.save(model.state_dict(), save_dir / "model.pt")
+    torch.save(model.state_dict(), save_dir / "best_model.pt")
 
     # vocab
     vocab.save_json(save_dir / "vocab.json")
