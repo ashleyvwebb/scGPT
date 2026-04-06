@@ -59,14 +59,10 @@ def save_checkpoint(model, vocab, stage_name):
 
     # config (CRITICAL)
     config = {
-        "pad_value": PAD_VALUE,
-        "mask_value": MASK_VALUE,
-        "mask_ratio": MASK_RATIO,
-        "max_seq_len": MAX_SEQ_LEN,
-        "input_style": "binned",
-        "normalize_total": 1e4,
-        "log1p": True,
-        "binning": 51,
+        "embsize":512,
+        "nheads":8,
+        "d_hid":512,
+        "nlayers":12,
     }
 
     with open(save_dir / "args.json", "w") as f:
