@@ -263,7 +263,8 @@ def run_one_batch(
 
     adata = preprocess_adata(adata)
 
-    batch_results = {p.name: [] for p in policies}
+    batch_results = {p.name: {"targets": [], "preds": []}
+                     for p in policies}
 
     for cell_index in range(start_idx, min(end_idx, adata.n_obs)):
 
@@ -302,10 +303,12 @@ def run_one_batch(
                 pad_token_id=pad_token_id,
             )
 
-            batch_results[policy.name].append({
-                "targets": values[masking.masked_indices].tolist(),
-                "preds": pred[masking.masked_indices].tolist()
-            })
+            batch_results[policy.name]["targets"].extend(
+                values[masking.masked_indices].tolist()
+            )
+            batch_results[policy.name]["preds"].extend(
+                pred[masking.masked_indices].tolist()
+            )
 
     for policy, results in batch_results.items():
         out = output_dir / EXPR_NAME / policy / f"batch_{start_idx}.json"
