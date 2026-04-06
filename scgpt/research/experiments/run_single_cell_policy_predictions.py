@@ -44,7 +44,7 @@ MASK_TOKEN_VALUE = -1
 PAD_VALUE = -2
 
 DEVICE = "cpu"
-EXPR_NAME = "batched_run_init"
+EXPR_NAME = "batched_run_inc_zero_genes"
 
 def load_hvg_genes(path):
     with open(path, "r") as f:
@@ -272,7 +272,7 @@ def run_one_batch(
             adata=adata,
             cell_index=cell_index,
             vocab=vocab,
-            include_zero_gene=False,
+            include_zero_gene=True,
         )
 
         gene_ids = prepared["tokenized_gene_ids"]
