@@ -69,7 +69,7 @@ def save_checkpoint(model, vocab, stage_name):
         "binning": 51,
     }
 
-    with open(save_dir / "config.json", "w") as f:
+    with open(save_dir / "args.json", "w") as f:
         json.dump(config, f, indent=2)
 
     print(f"Saved checkpoint: {save_dir}")
