@@ -33,7 +33,7 @@ def main(base):
         print(policy.name)
         print(t)
         print(t.shape)
-        print(t[:, 0].shape)
+        print(t[:].shape)
         plt.hist(t, bins=50)
         plt.title("Target distribution")
         plt.savefig(policy / "target_hist.png")
