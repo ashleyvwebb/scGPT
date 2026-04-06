@@ -256,73 +256,73 @@ def main():
     # -----------------------------
     # HVG MASKING
     # -----------------------------
-    with open("scgpt/research/data/HVGs/hvg_genes.txt", "r") as f:
-        hvg_gene_set = set(line.strip() for line in f)
+    # with open("scgpt/research/data/HVGs/hvg_genes.txt", "r") as f:
+    #     hvg_gene_set = set(line.strip() for line in f)
 
-    hvg_policy = HVGMaskingPolicy(hvg_gene_set)
+    # hvg_policy = HVGMaskingPolicy(hvg_gene_set)
 
-    print("STARTING TRAINING -- HVG MASKING")
+    # print("STARTING TRAINING -- HVG MASKING")
+    # train(
+    #     model,
+    #     gene_ids,
+    #     values,
+    #     gene_names,
+    #     hvg_policy,
+    #     pad_token_id,
+    #     4,
+    #     optimizer,
+    #     "HVG",
+    # )
+
+    # print("SAVING TRAINING -- HVG")
+    # save_checkpoint(model, vocab, "hvg")
+
+    # -----------------------------
+    # STAGE 1: UNIFORM
+    # -----------------------------
+    uniform_policy = UniformMaskingPolicy()
+
+    print("STARTING TRAINING -- UNIFORM")
     train(
         model,
         gene_ids,
         values,
         gene_names,
-        hvg_policy,
+        uniform_policy,
         pad_token_id,
-        4,
+        EPOCHS_STAGE1,
         optimizer,
-        "HVG",
+        "Uniform",
     )
 
-    print("SAVING TRAINING -- HVG")
-    save_checkpoint(model, vocab, "hvg")
+    print("SAVING TRAINING -- UNIFORM")
+    save_checkpoint(model, vocab, "stage1_uniform")
 
     # -----------------------------
-    # STAGE 1: UNIFORM
+    # STAGE 2: CANCER
     # -----------------------------
-    # uniform_policy = UniformMaskingPolicy()
+    cancer_genes = load_gene_set("scgpt/research/data/cancer_genes/cancer_gene_list.txt")
 
-    # print("STARTING TRAINING -- UNIFORM")
-    # train(
-    #     model,
-    #     gene_ids,
-    #     values,
-    #     gene_names,
-    #     uniform_policy,
-    #     pad_token_id,
-    #     EPOCHS_STAGE1,
-    #     optimizer,
-    #     "Uniform",
-    # )
+    cancer_policy = CancerWeightedMaskingPolicy(
+        cancer_genes,
+        cancer_weight=5.0,
+    )
 
-    # print("SAVING TRAINING -- UNIFORM")
-    # save_checkpoint(model, vocab, "stage1_uniform")
+    print("STARTING TRAINING -- CANCER WEIGHTED")
+    train(
+        model,
+        gene_ids,
+        values,
+        gene_names,
+        cancer_policy,
+        pad_token_id,
+        EPOCHS_STAGE2,
+        optimizer,
+        "Cancer",
+    )
 
-    # # -----------------------------
-    # # STAGE 2: CANCER
-    # # -----------------------------
-    # cancer_genes = load_gene_set("scgpt/research/data/cancer_genes/cancer_gene_list.txt")
-
-    # cancer_policy = CancerWeightedMaskingPolicy(
-    #     cancer_genes,
-    #     cancer_weight=5.0,
-    # )
-
-    # print("STARTING TRAINING -- CANCER WEIGHTED")
-    # train(
-    #     model,
-    #     gene_ids,
-    #     values,
-    #     gene_names,
-    #     cancer_policy,
-    #     pad_token_id,
-    #     EPOCHS_STAGE2,
-    #     optimizer,
-    #     "Cancer",
-    # )
-
-    # print("SAVING TRAINING -- CANCER WEIGHTED")
-    # save_checkpoint(model, vocab, "stage2_cancer")
+    print("SAVING TRAINING -- CANCER WEIGHTED")
+    save_checkpoint(model, vocab, "stage2_cancer")
 
 
 if __name__ == "__main__":
