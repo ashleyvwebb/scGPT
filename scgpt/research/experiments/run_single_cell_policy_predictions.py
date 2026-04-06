@@ -30,7 +30,7 @@ from scgpt.tokenizer import tokenize_and_pad_batch
 PROJECT_ROOT = "/springbrook/share/bioinf/csuxfw/scGPT/scgpt"
 
 H5AD_PATH=f"{PROJECT_ROOT}/research/data/dataset/test.h5ad"
-MODEL_DIR=f"{PROJECT_ROOT}/research/training/models/hvg"
+MODEL_DIR=f"{PROJECT_ROOT}/research/training/models/stage1_uniform"
 CANCER_GENE_PATH=f"{PROJECT_ROOT}/research/data/cancer_genes/cancer_gene_list.txt"
 HVG_GENE_PATH=f"{PROJECT_ROOT}/research/data/HVGs/hvg_genes.txt"
 OUTPUT_DIR=f"{PROJECT_ROOT}/research/results/batched_predictions/"
@@ -40,7 +40,7 @@ MASK_TOKEN_VALUE = -1
 PAD_VALUE = -2
 
 DEVICE = "cpu"
-EXPR_NAME = "hvg_model_test_no_zero"
+EXPR_NAME = "stage1_model_test_no_zero"
 
 def load_hvg_genes(path):
     with open(path, "r") as f:

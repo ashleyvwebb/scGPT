@@ -37,4 +37,4 @@ def main(base):
         plt.close()
 
 if __name__ == "__main__":
-    main("scgpt/research/results/batched_predictions/hvg_model_test_no_zero")
+    main("scgpt/research/results/batched_predictions/stage1_model_test_no_zero")
