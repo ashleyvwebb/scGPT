@@ -41,7 +41,7 @@ def main(base):
         plt.close()
 
         plt.figure()
-        plt.hist2d(t, p, bins=50, cmap='coolwarm')
+        plt.hist2d(t, p, bins=50)
         plt.colorbar()
         plt.savefig(policy / "hist2d_attemp.png")
         plt.close()
