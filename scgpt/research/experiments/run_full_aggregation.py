@@ -7,6 +7,12 @@ from scipy.stats import spearmanr, pearsonr
 
 BASE_DIR = Path("scgpt/research/results/cancer_predictions/")
 
+def split_by_threshold(t, p, threshold=35):
+    mask_left = t <= threshold
+    mask_right = t > threshold
+
+    return (t[mask_left], p[mask_left]), (t[mask_right], p[mask_right])
+
 def aggregate_policy(policy_dir):
     targets, preds = [], []
 
@@ -71,6 +77,8 @@ def run():
                 print(f"Aggregating {model_dir.name} / {query_dir.name} / {policy_dir.name}")
 
                 t, p = aggregate_policy(policy_dir)
+                # CHANGE MADE IN ORDER TO SPLIT THE DATA BY THRESHOLD
+                (left_t, left_p), (right_t, right_p) = split_by_threshold(t, p)
 
                 if len(t) == 0:
                     print("Skipping empty:", policy_dir)
@@ -78,6 +86,12 @@ def run():
 
                 pearson_corr, spearman_corr =  plot(t, p, policy_dir / "aggregated.png")
                 plot_hist(t, policy_dir)
+
+                if len(left_t) > 0:
+                    plot(left_t, left_p, policy_dir / "aggregated_low.png")
+
+                if len(right_t) > 0:
+                    plot(right_t, right_p, policy_dir / "aggregated_high.png")
 
                 summary.append({
                     "model": model_dir.name,
