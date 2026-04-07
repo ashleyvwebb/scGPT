@@ -14,7 +14,7 @@ from scgpt.research.masking.cancer_gene_sets import load_gene_set
 from scgpt.research.masking.policies import (
     UniformMaskingPolicy,
     CancerWeightedMaskingPolicy,
-    HVGMaskingPolicy,
+    SelectGenesMaskingPolicy,
 )
 from scgpt.research.experiments.common_prediction import apply_mask_to_values
 
@@ -47,12 +47,8 @@ def load_hvg_genes(path):
 def build_policies(cancer_gene_set: set[str], hvg_gene_set: set[str]):
     return [
         UniformMaskingPolicy(),
-        CancerWeightedMaskingPolicy(
-            cancer_gene_set,
-            cancer_weight=5.0,
-            non_cancer_weight=1.0,
-        ),
-        HVGMaskingPolicy(hvg_gene_set)
+        SelectGenesMaskingPolicy("HVG", hvg_gene_set),
+        SelectGenesMaskingPolicy("COSMIC", cancer_gene_set)
     ]
 
 

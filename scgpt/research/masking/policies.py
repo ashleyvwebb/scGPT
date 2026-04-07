@@ -112,10 +112,11 @@ class CancerWeightedMaskingPolicy(MaskingPolicy):
 
         return np.clip(probs, 0, 1)
 
-class HVGMaskingPolicy(MaskingPolicy):
-    name = "hvg"
+class SelectGenesMaskingPolicy(MaskingPolicy):
+    name = ""
 
-    def __init__(self, hvg_gene_set: set[str]):
+    def __init__(self, name, hvg_gene_set: set[str]):
+        self.name = name
         self.hvg_gene_set = hvg_gene_set
 
     def build_probability_matrix(

@@ -19,8 +19,7 @@ from scgpt.utils import load_pretrained
 
 from scgpt.research.masking.policies import (
     UniformMaskingPolicy,
-    CancerWeightedMaskingPolicy,
-    HVGMaskingPolicy
+    CancerWeightedMaskingPolicy
 )
 
 
@@ -417,7 +416,7 @@ def main():
     # STAGE 2: CANCER
     # -----------------------------
     optimizer = AdamW(model.parameters(), lr=LR)
-    
+
     cancer_genes = load_gene_set("scgpt/research/data/cancer_genes/cancer_gene_list.txt")
 
     cancer_policy = CancerWeightedMaskingPolicy(
