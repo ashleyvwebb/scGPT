@@ -32,7 +32,8 @@ def plot(targets, preds, out, xlim=None, ylim=None, jitter=False):
         preds = preds + np.random.uniform(-0.3, 0.3, size=len(preds))
 
     plt.figure()
-    plt.hist2d(targets, preds, bins=80, norm=LogNorm())
+    # plt.hist2d(targets, preds, bins=80, norm=LogNorm())
+    plt.hexbin(targets, preds, gridsize=60, norm=LogNorm(), mincnt=1)
     plt.colorbar()
 
     max_val = max(targets.max(), preds.max())
@@ -47,22 +48,15 @@ def plot(targets, preds, out, xlim=None, ylim=None, jitter=False):
     else:
         plt.ylim(0, max_val)
 
-    if xlim:
-        min_diag = xlim[0]
-        max_diag = xlim[1]
-    else:
-        min_diag = 0
-        max_diag = max_val
-
-
-    plt.plot([min_diag, max_diag], [min_diag, max_diag], 'r--')
+    x0, x1 = plt.xlim()
+    plt.plot([x0, x1], [x0, x1], 'r--')
 
     plt.xlabel("Target")
     plt.ylabel("Predicted")
 
     plt.text(
-        0.05 * (xlim[1] if xlim else max_diag),
-        0.95 * (xlim[1] if xlim else max_diag),
+        x0 + 0.05 * (x1 - x0),
+        ylim[1] - 0.05 * (ylim[1] - ylim[0]) if ylim else x1 * 0.95,
         f"Pearson: {pearson_corr:.3f}\nSpearman: {spearman_corr:.3f}",
         verticalalignment="top",
         bbox=dict(facecolor="white", alpha=0.8)
@@ -108,10 +102,10 @@ def run():
                 plot_hist(t, policy_dir)
 
                 if len(left_t) > 0:
-                    plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 35), ylim=(15,50), jitter=True)
+                    plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 35), ylim=(15,50), jitter=False)
 
                 if len(right_t) > 0:
-                    plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 52), ylim=(15, 52), jitter=True)
+                    plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 52), ylim=(15, 52), jitter=False)
 
                 summary.append({
                     "model": model_dir.name,
