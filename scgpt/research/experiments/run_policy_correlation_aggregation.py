@@ -19,13 +19,9 @@ def plot(targets, preds, out):
     plt.hist2d(targets, preds, bins=50, norm=LogNorm())
     plt.colorbar()
     # force axes to start at 0
-    plt.xlim(0, 50)
+    plt.xlim(0, targets.max())
     plt.ylim(0, preds.max())
     plt.plot([0, targets.max()], [0, targets.max()], 'r--')
-    # plt.hist2d(targets, preds, bins=50, norm=LogNorm())
-    # plt.colorbar()
-    # plt.plot([targets.min(), targets.max()],
-    #          [targets.min(), targets.max()], 'r--')
     plt.xlabel("Target")
     plt.ylabel("Predicted")
     plt.savefig(out, dpi=300)
@@ -45,4 +41,4 @@ def main(base):
         plt.close()
 
 if __name__ == "__main__":
-    main("scgpt/research/results/batched_predictions/uniform_model_test_no_zero_70")
+    main("scgpt/research/results/batched_predictions/uniform_model_test_no_zero")

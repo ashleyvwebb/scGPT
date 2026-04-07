@@ -5,28 +5,23 @@ def get_gene_names(adata):
         return adata.var["feature_name"].astype(str).tolist()
     return adata.var_names.astype(str).tolist()
 
-def compute_vocab_overlap(gene_names, vocab):
-    vocab_genes = set(vocab.get_stoi().keys()) if hasattr(vocab, "get_stoi") else set(vocab.keys())
-    gene_set = set(gene_names)
-    overlap = gene_set & vocab_genes
-    overlap_fraction = len(overlap) / len(vocab_genes) if len(vocab_genes) > 0 else 0.0
+def gene_overlap(list1, list1_label, list2, list2_label):
+    list1_set = set(list1)
+    list2_set = set(list2)
+    overlap = list1_set & list2_set
+    overlap_fraction = len(overlap) / len(list2_set) if len(list2_set) > 0 else 0.0
     return {
-        "n_genes": len(gene_set),
-        "n_vocab": len(vocab_genes),
+        f"n_{list1_label}": len(list1_set),
+        f"n_{list2_label}": len(list2_set),
         "n_overlap": len(overlap),
         "overlap_fraction": overlap_fraction,
         "overlap_genes": overlap,
     }
 
+def compute_vocab_overlap(gene_names, vocab):
+    vocab_list = vocab.get_stoi().keys() if hasattr(vocab, "get_stoi") else vocab.keys()
+    return gene_overlap(gene_names, "genes", vocab_list, "vocab")
+
 def compute_cancer_gene_overlap(gene_names, cancer_genes):
-    gene_set = set(gene_names)
-    cancer_gene_set = set(cancer_genes)
-    overlap = gene_set & cancer_gene_set
-    overlap_fraction = len(overlap) / len(cancer_gene_set) if len(cancer_gene_set) > 0 else 0.0
-    return {
-        "n_genes": len(gene_set),
-        "n_cancer_genes": len(cancer_gene_set),
-        "n_overlap": len(overlap),
-        "overlap_fraction": overlap_fraction,
-        "overlap_genes": overlap,
-    }
+    return gene_overlap(gene_names, "genes", cancer_genes, "cancer_genes")
+
