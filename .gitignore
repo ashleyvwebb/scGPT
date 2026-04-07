@@ -135,7 +135,7 @@ dmypy.json
 *.pkl
 *.RData
 *.Rhistory
-*.csv
+.csv
 *.out
 *.h5ad
 *.npy
