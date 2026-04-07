@@ -18,8 +18,14 @@ def plot(targets, preds, out):
     plt.figure()
     plt.hist2d(targets, preds, bins=50, norm=LogNorm())
     plt.colorbar()
-    plt.plot([targets.min(), targets.max()],
-             [targets.min(), targets.max()], 'r--')
+    # force axes to start at 0
+    plt.xlim(0, 50)
+    plt.ylim(0, 50)
+    plt.plot([0, 50], [0, 50], 'r--')
+    # plt.hist2d(targets, preds, bins=50, norm=LogNorm())
+    # plt.colorbar()
+    # plt.plot([targets.min(), targets.max()],
+    #          [targets.min(), targets.max()], 'r--')
     plt.xlabel("Target")
     plt.ylabel("Predicted")
     plt.savefig(out, dpi=300)
