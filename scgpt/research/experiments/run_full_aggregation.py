@@ -27,7 +27,7 @@ def plot(targets, preds, out, xlim=None, ylim=None):
     pearson_corr, _ = pearsonr(targets, preds)
     spearman_corr, _ = spearmanr(targets, preds)
 
-    bins = len(np.unique(targets)) + 1
+    bins = len(np.unique(targets))
 
     plt.figure()
     plt.hist2d(targets, preds, bins=bins, norm=LogNorm())
@@ -54,7 +54,7 @@ def plot(targets, preds, out, xlim=None, ylim=None):
     plt.text(
         x0 + 0.05 * (x1 - x0),
         ylim[1] - 0.05 * (ylim[1] - ylim[0]) if ylim else x1 * 0.95,
-        f"Pearson: {pearson_corr:.3f}\nSpearman: {spearman_corr:.3f}",
+        f"Bins:{bins}\nPearson: {pearson_corr:.3f}\nSpearman: {spearman_corr:.3f}",
         verticalalignment="top",
         bbox=dict(facecolor="white", alpha=0.8)
     )
