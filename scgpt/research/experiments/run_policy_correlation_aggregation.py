@@ -16,7 +16,8 @@ def aggregate(policy_dir):
 
 def plot(targets, preds, out):
     plt.figure(figsize=(6,6))
-    plt.hexbin(targets, preds, gridsize=50, bins='log')
+    plt.hist2d(targets, preds, bins=50, norm=LogNorm())
+    plt.colorbar()
     plt.plot([targets.min(), targets.max()],
              [targets.min(), targets.max()], 'r--')
     plt.xlabel("Target")
@@ -30,21 +31,11 @@ def main(base):
         if not policy.is_dir(): continue
         t, p = aggregate(policy)
         plot(t, p, policy / "aggregated.png")
-        missing = [i for i in range(int(t.min()), int(t.max())+1)
-           if i not in t]
-        print(missing)
-        print(np.unique(t))
     
         plt.figure()
         plt.hist(t, bins=50)
         plt.title("Target distribution")
         plt.savefig(policy / "target_hist.png")
-        plt.close()
-
-        plt.figure()
-        plt.hist2d(t, p, bins=50, norm=LogNorm())
-        plt.colorbar()
-        plt.savefig(policy / "hist2d_attemp.png")
         plt.close()
 
 if __name__ == "__main__":
