@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from scipy.stats import spearmanr, pearsonr
 
-BASE_DIR = Path("scgpt/research/results")
+BASE_DIR = Path("scgpt/research/results/cancer_predictions/")
 
 def aggregate_policy(policy_dir):
     targets, preds = [], []

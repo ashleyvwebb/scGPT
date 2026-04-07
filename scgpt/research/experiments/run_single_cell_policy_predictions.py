@@ -31,7 +31,7 @@ PROJECT_ROOT = "/springbrook/share/bioinf/csuxfw/scGPT/scgpt"
 
 CANCER_GENE_PATH=f"{PROJECT_ROOT}/research/data/cancer_genes/cancer_gene_list.txt"
 HVG_GENE_PATH=f"{PROJECT_ROOT}/research/data/HVGs/hvg_genes_70.txt"
-OUTPUT_DIR=f"{PROJECT_ROOT}/research/results/"
+OUTPUT_DIR=f"{PROJECT_ROOT}/research/results/cancer_predictions/"
 
 MASK_RATIO = 0.15
 MASK_TOKEN_VALUE = -1
@@ -324,7 +324,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    h5ad_path = f"{PROJECT_ROOT}/research/data/datasets/{args.query}/test.h5ad"
+    h5ad_path = f"{PROJECT_ROOT}/research/data/dataset/{args.query}/test.h5ad"
     model_dir = f"{PROJECT_ROOT}/research/training/models/{args.model_name}"
 
     run_one_batch(

@@ -21,7 +21,7 @@ for QUERY in "${QUERIES[@]}"; do
         JOB_ID=$(sbatch submit_single_cell_policy_predictions.sh "$QUERY" "$MODEL" | awk '{print $4}')
         echo "Submitted ${QUERY} / ${MODEL} -> JobID=${JOB_ID}"
 
-        JOB_IDS += ("${JOB_ID}")
+        JOB_IDS+=("${JOB_ID}")
 
     done
 done
@@ -32,7 +32,7 @@ echo "Waiting for completion..."
 while true; do 
     sleep 300
 
-    RUNNING=$(squeue -h 0j $(IFS=,; echo "${JOB_IDS[*]}") | wc -l)
+    RUNNING=$(squeue -h -j $(IFS=,; echo "${JOB_IDS[*]}") | wc -l)
 
     if [ "$RUNNING" -eq 0 ]; then
         echo "All jobs completed."
