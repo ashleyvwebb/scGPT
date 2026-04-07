@@ -106,7 +106,7 @@ def run():
                     plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 36), ylim=(15,50))
 
                 if len(right_t) > 0:
-                    plot(right_t, right_p, policy_dir / "aggregated_high_v2.png", xlim=(35, 51), ylim=(15, 55), mult=4)
+                    plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 51), ylim=(15, 55), mult=4)
 
                 summary.append({
                     "model": model_dir.name,
