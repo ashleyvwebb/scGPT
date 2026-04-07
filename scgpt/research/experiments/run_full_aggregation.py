@@ -31,7 +31,7 @@ def plot(targets, preds, out, xlim=None, ylim=None, mult=2):
     if bins != 50:
         jitter_strength = 0.5
         targets = targets + np.random.uniform(-jitter_strength, jitter_strength, size=len(targets))
-        bins = bins * 2
+        bins = bins * mult
 
     plt.figure()
     plt.hist2d(targets, preds, bins=bins, norm=LogNorm())
