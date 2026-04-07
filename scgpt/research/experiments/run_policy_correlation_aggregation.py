@@ -37,4 +37,4 @@ def main(base):
         plt.close()
 
 if __name__ == "__main__":
-    main("scgpt/research/results/batched_predictions/uniform_model_test_no_zero")
+    main("scgpt/research/results/batched_predictions/uniform_model_test_no_zero_70")

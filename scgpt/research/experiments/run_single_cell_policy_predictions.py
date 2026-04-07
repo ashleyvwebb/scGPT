@@ -32,7 +32,7 @@ PROJECT_ROOT = "/springbrook/share/bioinf/csuxfw/scGPT/scgpt"
 H5AD_PATH=f"{PROJECT_ROOT}/research/data/dataset/test.h5ad"
 MODEL_DIR=f"{PROJECT_ROOT}/research/training/models/uniform"
 CANCER_GENE_PATH=f"{PROJECT_ROOT}/research/data/cancer_genes/cancer_gene_list.txt"
-HVG_GENE_PATH=f"{PROJECT_ROOT}/research/data/HVGs/hvg_genes.txt"
+HVG_GENE_PATH=f"{PROJECT_ROOT}/research/data/HVGs/hvg_genes_70.txt"
 OUTPUT_DIR=f"{PROJECT_ROOT}/research/results/batched_predictions/"
 
 MASK_RATIO = 0.15
@@ -40,7 +40,7 @@ MASK_TOKEN_VALUE = -1
 PAD_VALUE = -2
 
 DEVICE = "cpu"
-EXPR_NAME = "uniform_model_test_no_zero"
+EXPR_NAME = "uniform_model_test_no_zero_70"
 
 def load_hvg_genes(path):
     with open(path, "r") as f:
