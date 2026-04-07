@@ -23,25 +23,46 @@ def aggregate_policy(policy_dir):
     
     return np.array(targets), np.array(preds)
 
-def plot(targets, preds, out, bins=50):
+def plot(targets, preds, out, xlim=None, ylim=None, jitter=False):
     pearson_corr, _ = pearsonr(targets, preds)
     spearman_corr, _ = spearmanr(targets, preds)
 
+    if jitter:
+        targets = targets + np.random.uniform(-0.3, 0.3, size=len(targets))
+        preds = preds + np.random.uniform(-0.3, 0.3, size=len(preds))
+
     plt.figure()
-    
-    plt.hist2d(targets, preds, bins=bins, norm=LogNorm())
+    plt.hist2d(targets, preds, bins=80, norm=LogNorm())
     plt.colorbar()
 
     max_val = max(targets.max(), preds.max())
 
-    # plt.plot([0, max_val], [0, max_val], 'r--')
+    if xlim:
+        plt.xlim(*xlim)
+    else:
+        plt.xlim(0, max_val)
+
+    if ylim:
+        plt.ylim(*ylim)
+    else:
+        plt.ylim(0, max_val)
+
+    if xlim:
+        min_diag = xlim[0]
+        max_diag = xlim[1]
+    else:
+        min_diag = 0
+        max_diag = max_val
+
+
+    plt.plot([min_diag, max_diag], [min_diag, max_diag], 'r--')
 
     plt.xlabel("Target")
     plt.ylabel("Predicted")
 
     plt.text(
-        0.05 * max_val,
-        0.95 * max_val,
+        0.05 * (xlim[1] if xlim else max_diag),
+        0.95 * (xlim[1] if xlim else max_diag),
         f"Pearson: {pearson_corr:.3f}\nSpearman: {spearman_corr:.3f}",
         verticalalignment="top",
         bbox=dict(facecolor="white", alpha=0.8)
@@ -87,10 +108,10 @@ def run():
                 plot_hist(t, policy_dir)
 
                 if len(left_t) > 0:
-                    plot(left_t, left_p, policy_dir / "aggregated_low.png", 35)
+                    plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 35), ylim=(15,50), jitter=True)
 
                 if len(right_t) > 0:
-                    plot(right_t, right_p, policy_dir / "aggregated_high.png", 15)
+                    plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 52), ylim=(15, 52), jitter=True)
 
                 summary.append({
                     "model": model_dir.name,
