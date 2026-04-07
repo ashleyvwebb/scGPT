@@ -29,6 +29,9 @@ def main(base):
         if not policy.is_dir(): continue
         t, p = aggregate(policy)
         plot(t, p, policy / "aggregated.png")
+        missing = [i for i in range(int(t.min()), int(t.max())+1)
+           if i not in t]
+        print(missing)
     
         plt.figure()
         plt.hist(t, bins=50)
