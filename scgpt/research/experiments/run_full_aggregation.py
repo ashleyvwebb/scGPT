@@ -23,18 +23,19 @@ def aggregate_policy(policy_dir):
     
     return np.array(targets), np.array(preds)
 
-def plot(targets, preds, out, xlim=None, ylim=None, jitter=False):
+def plot(targets, preds, out, xlim=None, ylim=None, full=True):
     pearson_corr, _ = pearsonr(targets, preds)
     spearman_corr, _ = spearmanr(targets, preds)
 
-    if jitter:
-        targets = targets + np.random.uniform(-0.3, 0.3, size=len(targets))
-        preds = preds + np.random.uniform(-0.3, 0.3, size=len(preds))
-
     plt.figure()
-    # plt.hist2d(targets, preds, bins=80, norm=LogNorm())
-    plt.hexbin(targets, preds, gridsize=60, norm=LogNorm(), mincnt=1)
-    plt.colorbar()
+
+    if full:
+        plt.hist2d(targets, preds, bins=50, norm=LogNorm())
+        plt.colorbar()
+    else:
+        # plt.hexbin(targets, preds, gridsize=60, norm=LogNorm(), mincnt=1)
+        plt.scatter(targets, preds, s=2, alpha=0.3)
+    
 
     max_val = max(targets.max(), preds.max())
 
@@ -102,10 +103,10 @@ def run():
                 plot_hist(t, policy_dir)
 
                 if len(left_t) > 0:
-                    plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 35), ylim=(15,50), jitter=False)
+                    plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 35), ylim=(15,50), full=False)
 
                 if len(right_t) > 0:
-                    plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 52), ylim=(15, 52), jitter=False)
+                    plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 52), ylim=(15, 52), full=False)
 
                 summary.append({
                     "model": model_dir.name,
