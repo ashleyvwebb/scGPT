@@ -28,12 +28,13 @@ def plot(targets, preds, out):
     spearman_corr, _ = spearmanr(targets, preds)
 
     plt.figure()
-    plt.hist2d(targets, preds, bins=50, norm=LogNorm())
+
+    bins = np.arrange(0, 52)
+
+    plt.hist2d(targets, preds, bins=[bins, bins], norm=LogNorm())
     plt.colorbar()
 
     max_val = max(targets.max(), preds.max())
-    plt.xlim(0, max_val)
-    plt.ylim(0, max_val)
 
     plt.plot([0, max_val], [0, max_val], 'r--')
 
