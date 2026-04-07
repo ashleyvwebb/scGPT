@@ -23,33 +23,31 @@ def aggregate_policy(policy_dir):
     
     return np.array(targets), np.array(preds)
 
-def plot(targets, preds, out, xlim=None, ylim=None, full=True):
+def plot(targets, preds, out, xlim=None, ylim=None, bins=50):
     pearson_corr, _ = pearsonr(targets, preds)
     spearman_corr, _ = spearmanr(targets, preds)
 
     plt.figure()
+    plt.hist2d(targets, preds, bins=bins, norm=LogNorm())
+    plt.colorbar()
 
-    if full:
-        plt.hist2d(targets, preds, bins=50, norm=LogNorm())
-        plt.colorbar()
-    else:
-        # plt.hexbin(targets, preds, gridsize=60, norm=LogNorm(), mincnt=1)
-        plt.scatter(targets, preds, s=2, alpha=0.3)
-    
+    t_min, t_max = targets.min(), targets.max()
+    p_min, p_max = preds.min(), preds.max()
 
-    max_val = max(targets.max(), preds.max())
+    lower = min(t_min, p_min)
+    upper = max(t_max, p_max)
 
-    if xlim:
-        plt.xlim(*xlim)
-    else:
-        plt.xlim(0, max_val)
+    pad = 0.02 * (upper - lower)
 
-    if ylim:
-        plt.ylim(*ylim)
-    else:
-        plt.ylim(0, max_val)
+    if xlim is None:
+        xlim = (lower - pad, upper + pad)
+    if ylim is None:
+        ylim = (lower - pad, upper + pad)
 
-    x0, x1 = plt.xlim()
+    plt.xlim(*xlim)
+    plt.ylim(*ylim)
+
+    x0, x1 = xlim
     plt.plot([x0, x1], [x0, x1], 'r--')
 
     plt.xlabel("Target")
@@ -57,7 +55,7 @@ def plot(targets, preds, out, xlim=None, ylim=None, full=True):
 
     plt.text(
         x0 + 0.05 * (x1 - x0),
-        ylim[1] - 0.05 * (ylim[1] - ylim[0]) if ylim else x1 * 0.95,
+        ylim[1] - 0.05 * (ylim[1] - ylim[0]),
         f"Pearson: {pearson_corr:.3f}\nSpearman: {spearman_corr:.3f}",
         verticalalignment="top",
         bbox=dict(facecolor="white", alpha=0.8)
@@ -99,14 +97,14 @@ def run():
                     print("Skipping empty:", policy_dir)
                     continue
 
-                pearson_corr, spearman_corr =  plot(t, p, policy_dir / "aggregated.png")
+                pearson_corr, spearman_corr =  plot(t, p, policy_dir / "aggregated.png", xlim=(0, 53), ylim=(0,53))
                 plot_hist(t, policy_dir)
 
                 if len(left_t) > 0:
-                    plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 35), ylim=(15,50), full=False)
+                    plot(left_t, left_p, policy_dir / "aggregated_low.png", bins=80)
 
                 if len(right_t) > 0:
-                    plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 52), ylim=(15, 52), full=False)
+                    plot(right_t, right_p, policy_dir / "aggregated_high.png", bins=80)
 
                 summary.append({
                     "model": model_dir.name,
