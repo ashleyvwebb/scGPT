@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
         results.append((hvg_file, stats))
     
-    with open("hvg_overlap_summary.csv", "w") as f:
+    with open("scgpt/research/data/HVGs/hvg_overlap_summary.csv", "w") as f:
         f.write("file, n_hvgs, n_overlap, n_overlap_fraction\n")
 
         for fname, s in results:
