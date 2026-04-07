@@ -29,7 +29,7 @@ def plot(targets, preds, out):
 
     plt.figure()
 
-    bins = np.arrange(0, 52)
+    bins = np.arange(0, 52)
 
     plt.hist2d(targets, preds, bins=[bins, bins], norm=LogNorm())
     plt.colorbar()
