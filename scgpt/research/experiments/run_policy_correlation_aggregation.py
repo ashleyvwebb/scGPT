@@ -15,8 +15,8 @@ def aggregate(policy_dir):
     return np.array(targets), np.array(preds)
 
 def plot(targets, preds, out):
-    plt.figure(figsize=(6,6))
-    plt.hist2d(targets, preds, bins=100, norm=LogNorm())
+    plt.figure()
+    plt.hist2d(targets, preds, bins=500, norm=LogNorm())
     plt.colorbar()
     plt.plot([targets.min(), targets.max()],
              [targets.min(), targets.max()], 'r--')
