@@ -40,5 +40,11 @@ def main(base):
         plt.savefig(policy / "target_hist.png")
         plt.close()
 
+        plt.figure()
+        plt.hist2d(t, p, bins=50, cmap='coolwarm')
+        plt.colorbar()
+        plt.savefig(policy / "hist2d_attemp.png")
+        plt.close()
+
 if __name__ == "__main__":
     main("scgpt/research/results/batched_predictions/uniform_model_test_no_zero_70")
