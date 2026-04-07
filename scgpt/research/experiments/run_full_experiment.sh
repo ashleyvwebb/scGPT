@@ -18,7 +18,7 @@ echo "Submitting jobs..."
 for QUERY in "${QUERIES[@]}"; do 
     for MODEL in "${MODELS[@]}"; do 
 
-        JOB_ID=$(sbatch submit_single_cell_policy_predictions.sh "$QUERY" "$MODEL" | awk '{print $4}')
+        JOB_ID=$(sbatch scgpt/research/experiments/submit_single_cell_policy_predictions.sh "$QUERY" "$MODEL" | awk '{print $4}')
         echo "Submitted ${QUERY} / ${MODEL} -> JobID=${JOB_ID}"
 
         JOB_IDS+=("${JOB_ID}")
