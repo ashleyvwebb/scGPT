@@ -28,6 +28,10 @@ def plot(targets, preds, out, xlim=None, ylim=None):
     spearman_corr, _ = spearmanr(targets, preds)
 
     bins = len(np.unique(targets))
+    if bins != 50:
+        jitter_strength = 0.5
+        targets = targets + np.random.uniform(-jitter_strength, jitter_strength, size=len(targets))
+        bins = bins * 2
 
     plt.figure()
     plt.hist2d(targets, preds, bins=bins, norm=LogNorm())
