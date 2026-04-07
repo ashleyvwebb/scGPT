@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-NUM_HVG = 50
+NUM_HVG = 70
 DATASET_PATH = "scgpt/research/data/dataset/train.h5ad"
 
 adata = sc.read_h5ad(DATASET_PATH)
@@ -19,7 +19,7 @@ hvg_mask = adata.var["highly_variable"].values
 hvg_genes = adata.var.loc[hvg_mask, "feature_name"].astype(str)
 
 # Save gene names
-hvg_genes.to_csv("scgpt/research/data/HVGs/hvg_genes.txt", index=False, header=False)
+hvg_genes.to_csv("scgpt/research/data/HVGs/hvg_genes_70.txt", index=False, header=False)
 
 # Plot HVGs
 means = adata.var["means"]
@@ -46,30 +46,5 @@ plt.scatter(
 plt.xlabel("mean expressions of genes")
 plt.ylabel("variances of genes (normalized)")
 plt.legend()
-plt.savefig("scgpt/research/data/HVGs/hvg_plot2.png", dpi=300)
+plt.savefig("scgpt/research/data/HVGs/hvg_plot_70.png", dpi=300)
 plt.close()
-
-
-def load_hvg_mask(adata, hvg_file):
-    """
-    Reconstruct HVG mask aligned with adata.X columns
-    
-    Parameters:
-        adata: AnnData
-        hvg_file: path to saved hvg_genes.txt
-
-    Returns:
-        hvg_mask: np.ndarray (bool)
-        hvg_indices: np.ndarray (int)
-    """
-    hvg_genes = pd.read_csv(hvg_file, header=None)[0].astype(str).values
-    
-    gene_names = adata.var["feature_name"].astype(str).values
-
-    hvg_set = set(hvg_genes)
-
-    hvg_mask = np.array([g in hvg_set for g in gene_names])
-
-    hvg_indices = np.where(hvg_mask)[0]
-
-    return hvg_mask, hvg_indices
