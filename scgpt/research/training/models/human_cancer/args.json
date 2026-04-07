@@ -1,0 +1,6 @@
+{
+  "embsize": 512,
+  "nheads": 8,
+  "d_hid": 512,
+  "nlayers": 12
+}
