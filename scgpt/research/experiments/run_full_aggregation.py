@@ -23,38 +23,27 @@ def aggregate_policy(policy_dir):
     
     return np.array(targets), np.array(preds)
 
-def plot(targets, preds, out, xlim=None, ylim=None):
+def plot(targets, preds, out):
     pearson_corr, _ = pearsonr(targets, preds)
     spearman_corr, _ = spearmanr(targets, preds)
 
-    bins = len(np.unique(targets))
-
     plt.figure()
-    plt.hist2d(targets, preds, bins=bins, norm=LogNorm())
+    plt.hist2d(targets, preds, bins=50, norm=LogNorm())
     plt.colorbar()
 
     max_val = max(targets.max(), preds.max())
+    plt.xlim(0, max_val)
+    plt.ylim(0, max_val)
 
-    if xlim:
-        plt.xlim(*xlim)
-    else:
-        plt.xlim(0, max_val)
-
-    if ylim:
-        plt.ylim(*ylim)
-    else:
-        plt.ylim(0, max_val)
-
-    x0, x1 = plt.xlim()
-    plt.plot([x0, x1], [x0, x1], 'r--')
+    plt.plot([0, max_val], [0, max_val], 'r--')
 
     plt.xlabel("Target")
     plt.ylabel("Predicted")
 
     plt.text(
-        x0 + 0.05 * (x1 - x0),
-        ylim[1] - 0.05 * (ylim[1] - ylim[0]) if ylim else x1 * 0.95,
-        f"Bins:{bins}\nPearson: {pearson_corr:.3f}\nSpearman: {spearman_corr:.3f}",
+        0.05 * max_val,
+        0.95 * max_val,
+        f"Pearson: {pearson_corr:.3f}\nSpearman: {spearman_corr:.3f}",
         verticalalignment="top",
         bbox=dict(facecolor="white", alpha=0.8)
     )
@@ -62,6 +51,37 @@ def plot(targets, preds, out, xlim=None, ylim=None):
     plt.savefig(out, dpi=300)
     plt.close()
     return pearson_corr, spearman_corr
+
+def plot_scatter(targets, preds, out):
+    pearson_corr, _ = pearsonr(targets, preds)
+    spearman_corr, _ = spearmanr(targets, preds)
+
+    jitter_strength = 0.5
+
+    targets_jittered = targets + np.random.uniform(-jitter_strength, jitter_strength, size=len(targets))
+
+    plt.figure()
+    plt.scatter(targets_jittered, preds, s=2, alpha=0.2)
+
+    max_val = max(targets.max(), preds.max())
+    plt.xlim(0, max_val)
+    plt.ylim(0, max_val)
+
+    plt.plot([0, max_val], [0, max_val], 'r--')
+
+    plt.xlabel("Target")
+    plt.ylabel("Predicted")
+
+    plt.text(
+        0.05 * max_val,
+        0.95 * max_val,
+        f"Pearson: {pearson_corr:.3f}\nSpearman: {spearman_corr:.3f}",
+        verticalalignment="top",
+        bbox=dict(facecolor="white", alpha=0.8)
+    )
+
+    plt.savefig(out, dpi=300)
+    plt.close()
 
 def plot_hist(t, policy):
     plt.figure()
@@ -99,10 +119,10 @@ def run():
                 plot_hist(t, policy_dir)
 
                 if len(left_t) > 0:
-                    plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 36), ylim=(15,50))
+                    plot_scatter(left_t, left_p, policy_dir / "aggregated_low.png")
 
                 if len(right_t) > 0:
-                    plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 51), ylim=(15, 55))
+                    plot_scatter(right_t, right_p, policy_dir / "aggregated_high.png")
 
                 summary.append({
                     "model": model_dir.name,
