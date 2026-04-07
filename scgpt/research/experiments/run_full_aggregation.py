@@ -1,0 +1,98 @@
+import json
+from pathlib import Path
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
+from scipy.stats import spearmanr, pearsonr
+
+BASE_DIR = Path("scgpt/research/results")
+
+def aggregate_policy(policy_dir):
+    targets, preds = [], []
+
+    for f in policy_dir.glob("batch_*.json"):
+        data = json.load(open(f))
+        targets.extend(data["targets"])
+        preds.extend(data["preds"])
+    
+    return np.array(targets), np.array(preds)
+
+def plot(targets, preds, out):
+    pearson_corr, _ = pearsonr(targets, preds)
+    spearman_corr, _ = spearmanr(targets, preds)
+
+    plt.figure()
+    plt.hist2d(targets, preds, bins=50, norm=LogNorm())
+    plt.colorbar()
+
+    max_val = max(targets.max(), preds.max())
+    plt.xlim(0, max_val)
+    plt.ylim(0, max_val)
+
+    plt.plot([0, max_val], [0, max_val], 'r--')
+
+    plt.xlabel("Target")
+    plt.ylabel("Predicted")
+
+    plt.text(
+        0.05 * max_val,
+        0.95 * max_val,
+        f"Pearson: {pearson_corr:.3f}\nSpearman: {spearman_corr:.3f}",
+        verticalalignment="top",
+        bbox=dict(facecolor="white", alpha=0.8)
+    )
+
+    plt.savefig(out, dpi=300)
+    plt.close()
+    return pearson_corr, spearman_corr
+
+def plot_hist(t, policy):
+    plt.figure()
+    plt.hist(t, bins=50)
+    plt.title("Target distribution")
+    plt.savefig(policy / "target_hist.png")
+    plt.close()
+
+def run():
+    summary = []
+
+    for model_dir in BASE_DIR.iterdir():
+        if not model_dir.is_dir():
+            continue
+
+        for query_dir in model_dir.iterdir():
+            if not query_dir.is_dir():
+                continue
+
+            for policy_dir in query_dir.iterdir():
+                if not policy_dir.is_dir():
+                    continue
+
+                print(f"Aggregating {model_dir.name} / {query_dir.name} / {policy_dir.name}")
+
+                t, p = aggregate_policy(policy_dir)
+
+                if len(t) == 0:
+                    print("Skipping empty:", policy_dir)
+                    continue
+
+                pearson_corr, spearman_corr =  plot(t, p, policy_dir / "aggregated.png")
+                plot_hist(t, policy_dir)
+
+                summary.append({
+                    "model": model_dir.name,
+                    "query": query_dir.name,
+                    "policy": policy_dir.name,
+                    "n": len(t),
+                    "pearson": float(pearson_corr),
+                    "spearman": float(spearman_corr)
+                })
+    
+    out_file = BASE_DIR / "summary.json"
+    with open(out_file, "w") as f:
+        json.dump(summary, f, indent=2)
+    
+    print(f"\nSaved summary -> {out_file}")
+
+if __name__ == "__main__":
+    run()

@@ -9,13 +9,16 @@
 #SBATCH --gres=gpu:lovelace_l40:1
 #SBATCH --output=logs/train_%j.out
 #SBATCH --error=logs/train_%j.err
-#SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=ashley.webb@warwick.ac.uk
 
+set -euo pipefail
+
+BASE_MODEL=$1
 
 echo "Starting job $SLURM_JOB_ID"
+echo "Base model: $BASE_MODEL"
 
 # Run training
-python -m scgpt.research.training.train_two_stage
+python -m scgpt.research.training.train_two_stage \
+    --base-model "$BASE_MODEL"
 
 echo "Finished job"

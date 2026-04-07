@@ -29,18 +29,15 @@ from scgpt.tokenizer import tokenize_and_pad_batch
 # =======
 PROJECT_ROOT = "/springbrook/share/bioinf/csuxfw/scGPT/scgpt"
 
-H5AD_PATH=f"{PROJECT_ROOT}/research/data/dataset/test.h5ad"
-MODEL_DIR=f"{PROJECT_ROOT}/research/training/models/uniform"
 CANCER_GENE_PATH=f"{PROJECT_ROOT}/research/data/cancer_genes/cancer_gene_list.txt"
 HVG_GENE_PATH=f"{PROJECT_ROOT}/research/data/HVGs/hvg_genes_70.txt"
-OUTPUT_DIR=f"{PROJECT_ROOT}/research/results/batched_predictions/"
+OUTPUT_DIR=f"{PROJECT_ROOT}/research/results/"
 
 MASK_RATIO = 0.15
 MASK_TOKEN_VALUE = -1
 PAD_VALUE = -2
 
 DEVICE = "cpu"
-EXPR_NAME = "uniform_model_test_no_zero_70"
 
 def load_hvg_genes(path):
     with open(path, "r") as f:
@@ -244,14 +241,19 @@ def run_model_forward(
 
 def run_one_batch(
     start_idx,
-    end_idx
+    end_idx,
+    h5ad_path,
+    model_dir,
+    model_name,
+    query,
 ):
-    output_dir = Path(OUTPUT_DIR)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    base_output_dir = Path(OUTPUT_DIR)
+    run_output_dir = base_output_dir / model_name / query
+    run_output_dir.mkdir(parents=True, exist_ok=True)
 
-    adata = load_h5ad(H5AD_PATH)
+    adata = load_h5ad(h5ad_path)
 
-    model, vocab = load_model(MODEL_DIR, DEVICE)
+    model, vocab = load_model(model_dir, DEVICE)
     cancer_gene_set = load_gene_set(CANCER_GENE_PATH)
     hvg_gene_set = load_hvg_genes(HVG_GENE_PATH)
 
@@ -308,7 +310,7 @@ def run_one_batch(
             )
 
     for policy, results in batch_results.items():
-        out = output_dir / EXPR_NAME / policy / f"batch_{start_idx}.json"
+        out = run_output_dir / policy / f"batch_{start_idx}.json"
         out.parent.mkdir(parents=True, exist_ok=True)
 
         with open(out, "w") as f:
@@ -318,15 +320,24 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--start-idx", type=int, required=True)
     p.add_argument("--end-idx", type=int, required=True)
+    p.add_argument("--query", type=str, required=True, choices=["blood", "lung", "blood-cancer", "lung-cancer"])
+    p.add_argument("--model-name", type=str, required=True, choices=["pretrained_human", "pretrained_pancancer", "human_uniform", "human_cancer", "pancancer_uniform", "pancancer_cancer"])
     return p.parse_args()
 
 
 def main():
     args = parse_args()
 
+    h5ad_path = f"{PROJECT_ROOT}/research/data/datasets/{args.query}/test.h5ad"
+    model_dir = f"{PROJECT_ROOT}/research/training/models/{args.model_name}"
+
     run_one_batch(
         start_idx = args.start_idx,
-        end_idx = args.end_idx
+        end_idx = args.end_idx,
+        h5ad_path = h5ad_path,
+        model_dir = model_dir,
+        model_name = args.model_name,
+        query = args.query
     )
 
 

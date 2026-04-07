@@ -4,6 +4,7 @@ import anndata as ad
 import json
 from torch.optim import AdamW
 from pathlib import Path
+import argparse
 
 from scgpt.tokenizer import tokenize_and_pad_batch
 from scgpt.loss import masked_mse_loss
@@ -29,8 +30,8 @@ from scgpt.research.masking.policies import (
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 BATCH_SIZE = 8
-EPOCHS_STAGE1 = 3
-EPOCHS_STAGE2 = 3
+EPOCHS_STAGE1 = 6
+EPOCHS_STAGE2 = 6
 LR = 1e-4
 
 MASK_RATIO = 0.4
@@ -40,8 +41,6 @@ PAD_VALUE = -2
 MAX_SEQ_LEN = 1200
 
 # paths
-MODEL_DIR = Path("scgpt/research/pretrained_models/whole_human")
-DATASET_ROOT = Path("scgpt/research/data/dataset")
 OUTPUT_DIR = Path("scgpt/research/training/models")
 
 
@@ -98,12 +97,14 @@ def load_model(model_dir):
 # -----------------------------
 # LOAD PROCESSED DATASET
 # -----------------------------
-def load_processed_dataset(root):
+def load_and_concat_dataset(paths):
+    adatas = []
+    for p in paths:
+        print(f"Loading dataset: {p}")
+        adatas.append(ad.read_h5ad(p))
 
-    path = root / "train.h5ad"
-    print(f"Loading {path}")
-    
-    return ad.read_h5ad(path)
+    print("Concatenating datasets...")
+    return ad.concat(adatas, join="outer", merge="same")
 
 
 # -----------------------------
@@ -163,6 +164,7 @@ def tokenize_dataset(adata, vocab):
 # -----------------------------
 def train(
     model,
+    vocab,
     gene_ids,
     values,
     gene_names,
@@ -171,8 +173,11 @@ def train(
     epochs,
     optimizer,
     stage_name,
+    model_prefix,
+    val_data=None
 ):
     model.train()
+    best_val = float("inf")
     N = gene_ids.shape[0]
 
     for epoch in range(epochs):
@@ -230,99 +235,213 @@ def train(
 
             total_loss += loss.item()
 
-        print(f"[{stage_name}] Epoch {epoch}: loss = {total_loss:.4f}")
+        print(f"[{stage_name}] Epoch {epoch}: train_loss = {total_loss:.4f}")
+
+        if val_data is not None:
+            val_loss = evaluate(
+                model,
+                val_data[0],
+                val_data[1],
+                gene_names,
+                policy,
+                pad_token_id
+            )
+            print(f"[{stage_name}] Epoch {epoch}: val_loss = {val_loss:.4f}")
+
+            if val_loss < best_val:
+                best_val = val_loss
+                print(f"[{stage_name}] New best model (val_loss={val_loss:.4f})")
+
+                save_checkpoint(
+                    model,
+                    vocab,
+                    f"{model_prefix}_{stage_name.lower()}_best"
+                )
+
+def evaluate(model, gene_ids, values, gene_names, policy, pad_token_id):
+    was_training = model.training
+    model.eval()
+
+    total_loss = 0.0
+    num_batches = 0
+
+    with torch.no_grad():
+        for i in range(0, len(gene_ids), BATCH_SIZE):
+            g = torch.tensor(gene_ids[i:i+BATCH_SIZE]).to(DEVICE)
+            v = torch.tensor(values[i:i+BATCH_SIZE]).float().to(DEVICE)
+
+            masked_batch = []
+            masks = []
+
+            for j in range(len(g)):
+                valid_mask = values[i+j] != PAD_VALUE
+
+                masking = policy.sample_mask(
+                    gene_names,
+                    values[i+j],
+                    mask_ratio=MASK_RATIO,
+                    valid_mask=valid_mask,
+                )
+
+                m = values[i+j].copy()
+                m[masking.mask] = MASK_VALUE
+
+                masked_batch.append(m)
+                masks.append(masking.mask)
+
+            masked_v = torch.tensor(np.stack(masked_batch)).to(DEVICE)
+            mask = torch.tensor(np.stack(masks)).to(DEVICE)
+
+            src_key_padding_mask = g.eq(pad_token_id)
+
+            out = model(
+                g,
+                masked_v,
+                src_key_padding_mask=src_key_padding_mask,
+                MVC=False,
+                ECS=False,
+            )
+
+            pred = out["mlm_output"]
+
+            loss = masked_mse_loss(pred, v, mask)
+
+            total_loss += loss.item()
+            num_batches += 1
+    
+    if was_training:
+        model.train()
+
+    return total_loss / num_batches
+
 
 
 # -----------------------------
 # MAIN
 # -----------------------------
+def parse_args():
+    p = argparse.ArgumentParser()
+    p.add_argument("--base-model", required=True, choices=["pretrained_human", "pretrained_pancancer"])
+    return p.parse_args()
+
 def main():
+    args = parse_args()
+
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+    if args.base_model == "pretrained_human":
+        model_dir = Path("scgpt/research/training/models/pretrained_human")
+
+        dataset_paths = [
+            Path("scgpt/research/data/dataset/blood/train.h5ad"),
+            Path("scgpt/research/data/dataset/lung/train.h5ad"),
+            Path("scgpt/research/data/dataset/blood-cancer/train.h5ad"),
+            Path("scgpt/research/data/dataset/lung-cancer/train.h5ad")
+        ]
+    elif args.base_model == "pretrained_pancancer":
+        model_dir = Path("scgpt/research/training/models/pretrained_pancancer")
+
+        dataset_paths = [
+            Path("scgpt/research/data/dataset/blood-cancer/train.h5ad"),
+            Path("scgpt/research/data/dataset/lung-cancer/train.h5ad")
+        ]
+    else:
+        raise ValueError("Invalid base model")
+    
+    model_prefix = args.base_model.replace("pretrained_", "")
+    
+    print("\n=== DATASETS USED ===")
+    for p in dataset_paths:
+        print("-", p)
+    print("")
+
     print("LOADING MODEL")
-    model, vocab = load_model(MODEL_DIR)
+    model, vocab = load_model(model_dir)
     optimizer = AdamW(model.parameters(), lr=LR)
 
     # load dataset
     print("LOADING DATASET")
-    adata = load_processed_dataset(DATASET_ROOT)
+    adata = load_and_concat_dataset(dataset_paths)
+    print(f"Total cells after concat: {adata.n_obs}")
+    print(f"Total genes: {adata.n_vars}")
+
     print("PREPROCESSING DATASET")
     adata = preprocess(adata)
 
     print("TOKENIZING DATASET")
     gene_ids, values, gene_names = tokenize_dataset(adata, vocab)
     pad_token_id = vocab["<pad>"]
+    print(f"Tokenized shape: {gene_ids.shape}")
 
-    # -----------------------------
-    # HVG MASKING
-    # -----------------------------
-    # with open("scgpt/research/data/HVGs/hvg_genes.txt", "r") as f:
-    #     hvg_gene_set = set(line.strip() for line in f)
+    N = gene_ids.shape[0]
+    split = int(0.9 * N)
+    perm = np.random.permutation(N)
+    train_idx = perm[:split]
+    val_idx = perm[split:]
 
-    # hvg_policy = HVGMaskingPolicy(hvg_gene_set)
+    train_data = (
+        gene_ids[train_idx],
+        values[train_idx]
+    )
 
-    # print("STARTING TRAINING -- HVG MASKING")
-    # train(
-    #     model,
-    #     gene_ids,
-    #     values,
-    #     gene_names,
-    #     hvg_policy,
-    #     pad_token_id,
-    #     4,
-    #     optimizer,
-    #     "HVG",
-    # )
-
-    # print("SAVING TRAINING -- HVG")
-    # save_checkpoint(model, vocab, "hvg")
+    val_data = (
+        gene_ids[val_idx],
+        values[val_idx]
+    )
 
     # -----------------------------
     # STAGE 1: UNIFORM
     # -----------------------------
     uniform_policy = UniformMaskingPolicy()
 
-    print("STARTING TRAINING -- UNIFORM")
+    print("TRAINING: UNIFORM")
     train(
         model,
-        gene_ids,
-        values,
+        vocab,
+        train_data[0],
+        train_data[1],
         gene_names,
         uniform_policy,
         pad_token_id,
-        6,
+        EPOCHS_STAGE1,
         optimizer,
         "Uniform",
+        model_prefix,
+        val_data=val_data,
     )
 
-    print("SAVING TRAINING -- UNIFORM")
-    save_checkpoint(model, vocab, "uniform")
+    print("SAVING:", f"{model_prefix}_uniform")
+    save_checkpoint(model, vocab, f"{model_prefix}_uniform")
 
     # -----------------------------
     # STAGE 2: CANCER
-    # # -----------------------------
-    # cancer_genes = load_gene_set("scgpt/research/data/cancer_genes/cancer_gene_list.txt")
+    # -----------------------------
+    optimizer = AdamW(model.parameters(), lr=LR)
+    
+    cancer_genes = load_gene_set("scgpt/research/data/cancer_genes/cancer_gene_list.txt")
 
-    # cancer_policy = CancerWeightedMaskingPolicy(
-    #     cancer_genes,
-    #     cancer_weight=5.0,
-    # )
+    cancer_policy = CancerWeightedMaskingPolicy(
+        cancer_genes,
+    )
 
-    # print("STARTING TRAINING -- CANCER WEIGHTED")
-    # train(
-    #     model,
-    #     gene_ids,
-    #     values,
-    #     gene_names,
-    #     cancer_policy,
-    #     pad_token_id,
-    #     EPOCHS_STAGE2,
-    #     optimizer,
-    #     "Cancer",
-    # )
+    print("TRAINING: CANCER")
+    train(
+        model,
+        vocab,
+        train_data[0],
+        train_data[1],
+        gene_names,
+        cancer_policy,
+        pad_token_id,
+        EPOCHS_STAGE2,
+        optimizer,
+        "Cancer",
+        model_prefix,
+        val_data=val_data,
+    )
 
-    # print("SAVING TRAINING -- CANCER WEIGHTED")
-    # save_checkpoint(model, vocab, "stage2_cancer")
+    print("SAVING:", f"{model_prefix}_cancer")
+    save_checkpoint(model, vocab, f"{model_prefix}_cancer")
 
 
 if __name__ == "__main__":
