@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-NUM_HVG = 70
+NUM_HVG = 100
 DATASET_PATH = "scgpt/research/data/dataset/train.h5ad"
 
 adata = sc.read_h5ad(DATASET_PATH)
@@ -19,7 +19,7 @@ hvg_mask = adata.var["highly_variable"].values
 hvg_genes = adata.var.loc[hvg_mask, "feature_name"].astype(str)
 
 # Save gene names
-hvg_genes.to_csv("scgpt/research/data/HVGs/hvg_genes_70.txt", index=False, header=False)
+hvg_genes.to_csv("scgpt/research/data/HVGs/hvg_genes_100.txt", index=False, header=False)
 
 # Plot HVGs
 means = adata.var["means"]
