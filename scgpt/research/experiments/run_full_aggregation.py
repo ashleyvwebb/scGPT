@@ -23,7 +23,7 @@ def aggregate_policy(policy_dir):
     
     return np.array(targets), np.array(preds)
 
-def plot(targets, preds, out, xlim=None, ylim=None):
+def plot(targets, preds, out, xlim=None, ylim=None, mult=2):
     pearson_corr, _ = pearsonr(targets, preds)
     spearman_corr, _ = spearmanr(targets, preds)
 
@@ -106,7 +106,7 @@ def run():
                     plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 36), ylim=(15,50))
 
                 if len(right_t) > 0:
-                    plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 51), ylim=(15, 55))
+                    plot(right_t, right_p, policy_dir / "aggregated_high_v2.png", xlim=(35, 51), ylim=(15, 55), mult=4)
 
                 summary.append({
                     "model": model_dir.name,
