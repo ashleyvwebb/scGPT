@@ -16,7 +16,7 @@ def aggregate(policy_dir):
 
 def plot(targets, preds, out):
     plt.figure()
-    plt.hist2d(targets, preds, bins=500, norm=LogNorm())
+    plt.hist2d(targets, preds, bins=50, norm=LogNorm())
     plt.colorbar()
     plt.plot([targets.min(), targets.max()],
              [targets.min(), targets.max()], 'r--')
