@@ -32,6 +32,7 @@ def main(base):
         missing = [i for i in range(int(t.min()), int(t.max())+1)
            if i not in t]
         print(missing)
+        print(np.unique(t))
     
         plt.figure()
         plt.hist(t, bins=50)
