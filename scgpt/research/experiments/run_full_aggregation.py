@@ -23,20 +23,18 @@ def aggregate_policy(policy_dir):
     
     return np.array(targets), np.array(preds)
 
-def plot(targets, preds, out):
+def plot(targets, preds, out, bins=50):
     pearson_corr, _ = pearsonr(targets, preds)
     spearman_corr, _ = spearmanr(targets, preds)
 
     plt.figure()
-
-    bins = np.arange(0, 52)
-
-    plt.hist2d(targets, preds, bins=[bins, bins], norm=LogNorm())
+    
+    plt.hist2d(targets, preds, bins=bins, norm=LogNorm())
     plt.colorbar()
 
     max_val = max(targets.max(), preds.max())
 
-    plt.plot([0, max_val], [0, max_val], 'r--')
+    # plt.plot([0, max_val], [0, max_val], 'r--')
 
     plt.xlabel("Target")
     plt.ylabel("Predicted")
@@ -79,7 +77,7 @@ def run():
 
                 t, p = aggregate_policy(policy_dir)
                 # CHANGE MADE IN ORDER TO SPLIT THE DATA BY THRESHOLD
-                (left_t, left_p), (right_t, right_p) = split_by_threshold(t, p)
+                (left_t, left_p), (right_t, right_p) = split_by_threshold(t, p, threshold=35)
 
                 if len(t) == 0:
                     print("Skipping empty:", policy_dir)
@@ -89,10 +87,10 @@ def run():
                 plot_hist(t, policy_dir)
 
                 if len(left_t) > 0:
-                    plot(left_t, left_p, policy_dir / "aggregated_low.png")
+                    plot(left_t, left_p, policy_dir / "aggregated_low.png", 35)
 
                 if len(right_t) > 0:
-                    plot(right_t, right_p, policy_dir / "aggregated_high.png")
+                    plot(right_t, right_p, policy_dir / "aggregated_high.png", 15)
 
                 summary.append({
                     "model": model_dir.name,
