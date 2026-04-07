@@ -30,7 +30,7 @@ echo "All jobs submitted."
 echo "Waiting for completion..."
 
 while true; do 
-    sleep 300
+    sleep 30
 
     RUNNING=$(squeue -h -j $(IFS=,; echo "${JOB_IDS[*]}") | wc -l)
 
@@ -44,6 +44,6 @@ done
 
 echo "Starting aggregation..."
 
-python run_full_aggregation.py
+python -m scgpt.research.experiments.run_full_aggregation
 
 echo "Done."
