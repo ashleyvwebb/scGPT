@@ -5,14 +5,14 @@ def get_gene_names(adata):
         return adata.var["feature_name"].astype(str).tolist()
     return adata.var_names.astype(str).tolist()
 
-def gene_overlap(list1, list1_label, list2, list2_label):
-    list1_set = set(list1)
-    list2_set = set(list2)
+def gene_overlap(source, soruce_label, reference, reference_label):
+    list1_set = set(source)
+    list2_set = set(reference)
     overlap = list1_set & list2_set
     overlap_fraction = len(overlap) / len(list2_set) if len(list2_set) > 0 else 0.0
     return {
-        f"n_{list1_label}": len(list1_set),
-        f"n_{list2_label}": len(list2_set),
+        f"n_{soruce_label}": len(list1_set),
+        f"n_{reference_label}": len(list2_set),
         "n_overlap": len(overlap),
         "overlap_fraction": overlap_fraction,
         "overlap_genes": overlap,
