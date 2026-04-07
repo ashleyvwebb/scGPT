@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 
 def aggregate(policy_dir):
     targets, preds = [], []
@@ -41,7 +42,7 @@ def main(base):
         plt.close()
 
         plt.figure()
-        plt.hist2d(t, p, bins=50)
+        plt.hist2d(t, p, bins=50, norm=LogNorm())
         plt.colorbar()
         plt.savefig(policy / "hist2d_attemp.png")
         plt.close()
