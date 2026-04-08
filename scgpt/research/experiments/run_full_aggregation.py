@@ -103,18 +103,22 @@ def run():
                 plot_hist(t, policy_dir)
 
                 if len(left_t) > 0:
-                    plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 36), ylim=(15,50))
+                    pearson_corr_low, spearman_corr_low = plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 36), ylim=(15,50))
 
                 if len(right_t) > 0:
-                    plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 51), ylim=(15, 55), mult=4)
+                    pearson_corr_high, spearman_corr_high = plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 51), ylim=(15, 55), mult=4)
 
                 summary.append({
                     "model": model_dir.name,
                     "query": query_dir.name,
                     "policy": policy_dir.name,
                     "n": len(t),
-                    "pearson": float(pearson_corr),
-                    "spearman": float(spearman_corr)
+                    "pearson_full": float(pearson_corr),
+                    "spearman_full": float(spearman_corr),
+                    "pearson_low": float(pearson_corr_low),
+                    "spearman_low": float(spearman_corr_low),
+                    "pearson_high": float(pearson_corr_high),
+                    "spearman_high": float(spearman_corr_high),
                 })
     
     out_file = BASE_DIR / "summary.json"

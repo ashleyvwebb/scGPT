@@ -257,7 +257,7 @@ def run_one_batch(
 
     adata = preprocess_adata(adata)
 
-    batch_results = {p.name: {"targets": [], "preds": []}
+    batch_results = {p.name: {"targets": [], "preds": [], "genes": []}
                      for p in policies}
 
     for cell_index in range(start_idx, min(end_idx, adata.n_obs)):
@@ -304,13 +304,16 @@ def run_one_batch(
             batch_results[policy.name]["preds"].extend(
                 pred[masking.masked_indices].tolist()
             )
+            batch_results[policy.name]["genes"].extend(
+                names[masking.masked_indices].tolist()
+            )
 
     for policy, results in batch_results.items():
         out = run_output_dir / policy / f"batch_{start_idx}.json"
         out.parent.mkdir(parents=True, exist_ok=True)
 
         with open(out, "w") as f:
-            json.dump(results, f)
+            json.dump(results, f, indent=2)
 
 def parse_args():
     p = argparse.ArgumentParser()

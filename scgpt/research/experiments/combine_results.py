@@ -8,7 +8,7 @@ def json_to_csv(input_file, output_file):
     with open(input_file, "r") as f:
         data = json.load(f)
 
-    fieldnames = ["model", "query", "policy", "n", "pearson", "spearman"]
+    fieldnames = ["model", "query", "policy", "n", "pearson_full", "spearman_full", "pearson_low", "spearman_low", "pearson_high", "spearman_high"]
 
     with open(output_file, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
