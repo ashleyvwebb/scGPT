@@ -50,7 +50,6 @@ def plot(targets, preds, out, xlim=None, ylim=None, mult=2):
         plt.ylim(0, max_val)
 
     x0, x1 = plt.xlim()
-    plt.plot([x0, x1], [x0, x1], 'r--')
 
     plt.xlabel("Target")
     plt.ylabel("Predicted")
