@@ -17,6 +17,8 @@ from scgpt.model import TransformerModel
 from scgpt.tokenizer.gene_tokenizer import GeneVocab
 from scgpt.utils import load_pretrained
 
+from scgpt.research.masking.schedules import DynamicSchedule
+
 from scgpt.research.masking.policies import (
     UniformMaskingPolicy,
     CancerWeightedMaskingPolicy
@@ -167,14 +169,21 @@ def train(
     gene_ids,
     values,
     gene_names,
-    policy,
+    schedule, 
     pad_token_id,
     epochs,
     optimizer,
-    stage_name,
     model_prefix,
     val_data=None
 ):
+    """
+    Training loop using a masking schedule.
+
+    Key change:
+    - Instead of a fixed policy, we query the schedule at each epoch
+      to dynamically switch masking behaviour.
+    """
+
     model.train()
     best_val = float("inf")
     N = gene_ids.shape[0]
@@ -183,10 +192,14 @@ def train(
         perm = np.random.permutation(N)
         total_loss = 0
 
-        print("STARTING EPOCH", epoch)
+        # --- Get current policy + mask ratio from schedule ---
+        scheduled = schedule.get(epoch)
+        policy = scheduled.policy
+        mask_ratio = scheduled.mask_ratio
+
+        print(f"\n[Epoch {epoch}] Using policy: {policy.name}, mask_ratio={mask_ratio}")
 
         for i in range(0, N, BATCH_SIZE):
-            print("STARTING BATCH", i)
             idx = perm[i:i+BATCH_SIZE]
 
             g = torch.tensor(gene_ids[idx]).to(DEVICE)
@@ -201,7 +214,7 @@ def train(
                 masking = policy.sample_mask(
                     gene_names,
                     values[idx[j]],
-                    mask_ratio=MASK_RATIO,
+                    mask_ratio=mask_ratio,  # <-- dynamic now
                     valid_mask=valid_mask,
                 )
 
@@ -225,7 +238,6 @@ def train(
             )
 
             pred = out["mlm_output"]
-
             loss = masked_mse_loss(pred, v, mask)
 
             optimizer.zero_grad()
@@ -234,8 +246,9 @@ def train(
 
             total_loss += loss.item()
 
-        print(f"[{stage_name}] Epoch {epoch}: train_loss = {total_loss:.4f}")
+        print(f"Epoch {epoch}: train_loss = {total_loss:.4f}")
 
+        # --- Validation uses same scheduled policy ---
         if val_data is not None:
             val_loss = evaluate(
                 model,
@@ -243,21 +256,27 @@ def train(
                 val_data[1],
                 gene_names,
                 policy,
+                mask_ratio,  # <-- pass ratio explicitly
                 pad_token_id
             )
-            print(f"[{stage_name}] Epoch {epoch}: val_loss = {val_loss:.4f}")
+
+            print(f"Epoch {epoch}: val_loss = {val_loss:.4f}")
 
             if val_loss < best_val:
                 best_val = val_loss
-                print(f"[{stage_name}] New best model (val_loss={val_loss:.4f})")
+                print(f"New best model (val_loss={val_loss:.4f})")
 
                 save_checkpoint(
                     model,
                     vocab,
-                    f"{model_prefix}_{stage_name.lower()}_best"
+                    f"{model_prefix}_best"
                 )
 
-def evaluate(model, gene_ids, values, gene_names, policy, pad_token_id):
+def evaluate(model, gene_ids, values, gene_names, policy, mask_ratio, pad_token_id):
+    """
+    Evaluation must use the SAME masking behaviour as training at that epoch.
+    """
+
     was_training = model.training
     model.eval()
 
@@ -278,7 +297,7 @@ def evaluate(model, gene_ids, values, gene_names, policy, pad_token_id):
                 masking = policy.sample_mask(
                     gene_names,
                     values[i+j],
-                    mask_ratio=MASK_RATIO,
+                    mask_ratio=mask_ratio,  # <-- dynamic
                     valid_mask=valid_mask,
                 )
 
@@ -302,12 +321,11 @@ def evaluate(model, gene_ids, values, gene_names, policy, pad_token_id):
             )
 
             pred = out["mlm_output"]
-
             loss = masked_mse_loss(pred, v, mask)
 
             total_loss += loss.item()
             num_batches += 1
-    
+
     if was_training:
         model.train()
 
@@ -389,58 +407,42 @@ def main():
     )
 
     # -----------------------------
-    # STAGE 1: UNIFORM
+    # DEFINE SCHEDULE
     # -----------------------------
+
     uniform_policy = UniformMaskingPolicy()
 
-    print("TRAINING: UNIFORM")
-    train(
-        model,
-        vocab,
-        train_data[0],
-        train_data[1],
-        gene_names,
-        uniform_policy,
-        pad_token_id,
-        EPOCHS_STAGE1,
-        optimizer,
-        "Uniform",
-        model_prefix,
-        val_data=val_data,
-    )
-
-    print("SAVING:", f"{model_prefix}_uniform")
-    save_checkpoint(model, vocab, f"{model_prefix}_uniform")
-
-    # -----------------------------
-    # STAGE 2: CANCER
-    # -----------------------------
-    optimizer = AdamW(model.parameters(), lr=LR)
-
     cancer_genes = load_gene_set("scgpt/research/data/cancer_genes/cancer_gene_list.txt")
+    cancer_policy = CancerWeightedMaskingPolicy(cancer_genes)
 
-    cancer_policy = CancerWeightedMaskingPolicy(
-        cancer_genes,
+    # Two-stage equivalent using DynamicSchedule
+    schedule = DynamicSchedule(
+        policies=[uniform_policy, cancer_policy],
+        mask_ratios=[MASK_RATIO, MASK_RATIO],
+        switch_epochs=[EPOCHS_STAGE1],  # switch after stage 1
     )
 
-    print("TRAINING: CANCER")
+    TOTAL_EPOCHS = EPOCHS_STAGE1 + EPOCHS_STAGE2
+
+    print("TRAINING WITH DYNAMIC SCHEDULE")
+
     train(
         model,
         vocab,
         train_data[0],
         train_data[1],
         gene_names,
-        cancer_policy,
+        schedule,  # <-- now schedule
         pad_token_id,
-        EPOCHS_STAGE2,
+        TOTAL_EPOCHS,
         optimizer,
-        "Cancer",
         model_prefix,
         val_data=val_data,
     )
 
-    print("SAVING:", f"{model_prefix}_cancer")
-    save_checkpoint(model, vocab, f"{model_prefix}_cancer")
+    # final save
+    print("SAVING FINAL MODEL:", model_prefix)
+    save_checkpoint(model, vocab, model_prefix)
 
 
 if __name__ == "__main__":

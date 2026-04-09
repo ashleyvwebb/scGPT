@@ -181,7 +181,7 @@ def train(
     optimizer,
     scheduler,
     device,
-    config, # TODO: look at this more 
+    config, 
     logger,
     epoch,
 ) -> None:
@@ -190,7 +190,7 @@ def train(
     """
     import wandb
 
-    model.train() # TODO: verify the function of this
+    model.train() 
     total_loss, total_gep, total_cls, total_gepc, total_ecs, total_dab = (
         0.0,
         0.0,
@@ -234,11 +234,10 @@ def train(
             )
 
             masked_positions = input_values.eq(
-                config.mask_value # TODO: ! Masks and predicts for certain positions - given by the configurations - check how this would be used
+                config.mask_value 
             )  # the postions to predict
             loss = 0.0
             metrics_to_log = {}
-            # TODO: check the different types of config and then also check the config data structure
             if config.GEP:
                 loss_gep = criterion_gep_gepc( # ? : What does this function do?
                     output_dict["mlm_output"], target_values, masked_positions

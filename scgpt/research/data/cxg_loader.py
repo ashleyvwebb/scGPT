@@ -57,6 +57,7 @@ def load_query_as_adata(h5ad_root: str | Path, query_name: str, max_files: int |
     merged.var_names_make_unique()
     return merged, files
 
+# TO BE USED IF DATA IS STORED AS .scb FILES
 def get_all_counts_path(scb_root: str | Path, query_name: str) -> Path:
     # returns {scb_root}/{query_name}/all_counts
     # these are the processed parquet locations created by build_large_scale_data.py

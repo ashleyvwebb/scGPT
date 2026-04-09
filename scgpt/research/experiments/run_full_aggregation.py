@@ -51,8 +51,6 @@ def plot(targets, preds, out, xlim=None, ylim=None, mult=2):
 
     x0, x1 = plt.xlim()
 
-    plt.axvline(x=35, color='r')
-
     plt.xlabel("Target")
     plt.ylabel("Predicted")
 
@@ -100,33 +98,33 @@ def run():
                     print("Skipping empty:", policy_dir)
                     continue
 
-                pearson_corr, spearman_corr =  plot(t, p, policy_dir / "aggregated_vert_line.png")
-    #             plot_hist(t, policy_dir)
+                pearson_corr, spearman_corr =  plot(t, p, policy_dir / "aggregated.png")
+                plot_hist(t, policy_dir)
 
-    #             if len(left_t) > 0:
-    #                 pearson_corr_low, spearman_corr_low = plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 36), ylim=(15,50))
+                if len(left_t) > 0:
+                    pearson_corr_low, spearman_corr_low = plot(left_t, left_p, policy_dir / "aggregated_low.png", xlim=(0, 36), ylim=(15,50))
 
-    #             if len(right_t) > 0:
-    #                 pearson_corr_high, spearman_corr_high = plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 51), ylim=(15, 55), mult=4)
+                if len(right_t) > 0:
+                    pearson_corr_high, spearman_corr_high = plot(right_t, right_p, policy_dir / "aggregated_high.png", xlim=(35, 51), ylim=(15, 55), mult=4)
 
-    #             summary.append({
-    #                 "model": model_dir.name,
-    #                 "query": query_dir.name,
-    #                 "policy": policy_dir.name,
-    #                 "n": len(t),
-    #                 "pearson_full": float(pearson_corr),
-    #                 "spearman_full": float(spearman_corr),
-    #                 "pearson_low": float(pearson_corr_low),
-    #                 "spearman_low": float(spearman_corr_low),
-    #                 "pearson_high": float(pearson_corr_high),
-    #                 "spearman_high": float(spearman_corr_high),
-    #             })
+                summary.append({
+                    "model": model_dir.name,
+                    "query": query_dir.name,
+                    "policy": policy_dir.name,
+                    "n": len(t),
+                    "pearson_full": float(pearson_corr),
+                    "spearman_full": float(spearman_corr),
+                    "pearson_low": float(pearson_corr_low),
+                    "spearman_low": float(spearman_corr_low),
+                    "pearson_high": float(pearson_corr_high),
+                    "spearman_high": float(spearman_corr_high),
+                })
     
-    # out_file = BASE_DIR / "summary.json"
-    # with open(out_file, "w") as f:
-    #     json.dump(summary, f, indent=2)
+    out_file = BASE_DIR / "summary.json"
+    with open(out_file, "w") as f:
+        json.dump(summary, f, indent=2)
     
-    # print(f"\nSaved summary -> {out_file}")
+    print(f"\nSaved summary -> {out_file}")
 
 if __name__ == "__main__":
     run()

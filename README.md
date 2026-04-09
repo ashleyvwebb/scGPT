@@ -1,4 +1,75 @@
-# scGPT - Test to change
+# scGPT
+
+## Research Implementation (Custom)
+
+This repository contains a custom research implementation built on top of scGPT, located in:
+
+scgpt/research/
+
+This directory includes the full experimental pipeline used in this project, covering:
+
+- Data processing and dataset construction  
+- Masking strategy design and scheduling  
+- Model fine-tuning  
+- Large-scale experimental evaluation  
+- Result aggregation and analysis  
+
+For full details, navigate to:
+
+scgpt/research/README.md
+
+---
+
+## Important Notes on Running the Code
+
+The research code in scgpt/research is **not directly runnable out-of-the-box** in a standard environment.
+
+The following requirements must be met:
+
+- A **fully working scGPT installation**, including all dependencies  
+- Access to **pretrained scGPT checkpoints**  
+- Access to **large-scale single-cell datasets** (CellxGene-derived `.h5ad` files)  
+- A **GPU-enabled environment** (training and large-scale experiments are not feasible on CPU)  
+- A **cluster or batch system (e.g. SLURM)** for running experiments at scale  
+
+Without these, the pipeline will not execute correctly.
+
+---
+
+## Scope of This Implementation
+
+The code in scgpt/research is designed for:
+
+- Controlled experimentation with masking strategies  
+- Multi-stage training using dynamic masking schedules  
+- Systematic evaluation across datasets and models  
+
+It is **not intended as a lightweight example or minimal runnable demo**, but rather as a structured research pipeline.
+
+---
+
+## Recommended Usage
+
+To explore the implementation:
+
+1. Navigate to scgpt/research  
+2. Follow the README files in each submodule:
+   - data  
+   - masking  
+   - training  
+   - experiments  
+   - results  
+
+3. Use the code as a reference for:
+   - masking strategy design  
+   - training pipeline structure  
+   - experimental evaluation workflows  
+
+---
+
+## Summary
+
+The scgpt/research directory contains a complete, modular framework for investigating how masking strategies affect gene expression modelling in scGPT, designed for reproducibility and scalability in a research setting.
 
 This is the official codebase for **scGPT: Towards Building a Foundation Model for Single-Cell Multi-omics Using Generative AI**.
 

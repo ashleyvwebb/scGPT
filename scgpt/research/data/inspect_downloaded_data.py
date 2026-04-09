@@ -57,9 +57,13 @@ def inspect_query(
         result["error"] = "No .h5ad files found for this query."
         return result
     
+    # For each partition
     for i, file_path in enumerate(files):
         file_info: dict = {"file": str(file_path)}
 
+        # try to load the partition and collate the basic results of the data in the partition
+        # storing the data in a dict
+        # then append the dict to the other information saved about the file 
         try:
             adata = load_h5ad(file_path)
 
@@ -193,6 +197,7 @@ def main():
     vocab = GeneVocab.from_file(args.vocab_path)
     cancer_gene_set = load_cancer_gene_set(args.cancer_gene_path)
 
+    # inspect the partition files for each query and print the results
     all_results = []
     for query_name in args.queries:
         result = inspect_query(
@@ -206,6 +211,7 @@ def main():
         all_results.append(result)
         print_result(result)
     
+    # save the output to a JSON file
     if args.output_json is not None:
         args.output_json.parent.mkdir(parents=True, exist_ok=True)
         with args.output_json.open("w") as f:

@@ -24,7 +24,6 @@ except ImportError:
 from .dsbn import DomainSpecificBatchNorm1d
 from .grad_reverse import grad_reverse
 
-# TODO: look into this class 
 class TransformerModel(nn.Module):
     def __init__(
         self,

@@ -112,7 +112,7 @@ class CancerWeightedMaskingPolicy(MaskingPolicy):
 
         return np.clip(probs, 0, 1)
 
-class SelectGenesMaskingPolicy(MaskingPolicy):
+class DeterministicMaskingPolicy(MaskingPolicy):
     name = ""
 
     def __init__(self, name, hvg_gene_set: set[str]):
@@ -145,3 +145,12 @@ class SelectGenesMaskingPolicy(MaskingPolicy):
         probs[hvg_indices] = 1
 
         return np.clip(probs, 0, 1)
+    
+def apply_mask_to_values(
+    values: np.ndarray,
+    mask: np.ndarray,
+    mask_token_value: int | float,
+) -> np.ndarray:
+    masked = values.copy()
+    masked[mask] = mask_token_value
+    return masked

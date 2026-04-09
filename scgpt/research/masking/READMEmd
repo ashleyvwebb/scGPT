@@ -1,0 +1,253 @@
+# Masking Module
+
+This directory contains the implementation of masking strategies and scheduling mechanisms used during model training and evaluation.
+
+Masking is central to the masked language modelling (MLM) objective used by scGPT, where a subset of gene expression values is hidden and the model is trained to reconstruct them.
+
+---
+
+## Overview
+
+The module is structured into three components:
+
+1. Gene set utilities  
+2. Masking policies  
+3. Masking schedules  
+
+Together, these define:
+- which genes are masked
+- how often they are masked
+- when masking strategies change during training
+
+---
+
+## Gene Set Utilities
+
+### cancer_gene_sets.py
+
+Provides utilities for loading and working with gene sets.
+
+Key functionality:
+- Load gene lists from file
+- Normalise gene naming (e.g. uppercase consistency)
+- Compute gene membership indicators
+
+Main uses:
+- Defining cancer gene sets
+- Identifying genes present in a dataset
+
+---
+
+## Masking Policies
+
+### policies.py
+
+Defines different strategies for selecting which genes to mask.
+
+All policies inherit from:
+```python
+class MaskingPolicy
+```
+
+Each policy implements:
+- `build_probability_matrix(...)` → defines masking probabilities
+- `sample_mask(...)` → samples a mask using Bernoulli sampling
+
+The output is a `MaskingResult`:
+- `mask`: boolean array indicating masked positions  
+- `masked_indices`: indices of masked tokens  
+
+---
+
+### Implemented Policies
+
+#### UniformMaskingPolicy
+
+- Masks all valid genes with equal probability  
+- Equivalent to standard MLM masking  
+
+---
+
+#### CancerWeightedMaskingPolicy
+
+- Biases masking towards cancer-related genes  
+- Uses weighted probabilities:
+  - Higher weight → higher masking probability  
+- Normalised to preserve the overall mask ratio  
+
+---
+
+#### DeterministicMaskingPolicy
+
+- Masks a fixed subset of genes (e.g. HVGs or cancer genes)  
+- Sets masking probability = 1 for selected genes  
+- Ignores `mask_ratio` (masks all matching genes)  
+
+Used for:
+- Controlled probing experiments  
+- Targeted evaluation of specific gene sets  
+
+---
+
+### Mask Application
+
+```python
+apply_mask_to_values(values, mask, mask_token_value)
+```
+
+- Replaces masked values with a sentinel token (e.g. -1)  
+- Leaves unmasked values unchanged  
+
+---
+
+## Masking Schedules
+
+### schedules.py
+
+Defines how masking policies change over training epochs.
+
+---
+
+### Core Abstractions
+
+#### ScheduledPolicy
+
+Simple container:
+- `policy`: masking policy  
+- `mask_ratio`: associated masking ratio  
+
+---
+
+#### MaskingSchedule (base class)
+
+Interface:
+```python
+get(epoch: int) -> ScheduledPolicy
+```
+
+Returns the active policy for a given epoch.
+
+---
+
+### Implemented Schedules
+
+#### ConstantSchedule
+
+- Uses a single policy throughout training  
+- No change over time  
+
+---
+
+#### DynamicSchedule
+
+General multi-stage schedule.
+
+Inputs:
+- `policies`: list of masking policies  
+- `mask_ratios`: list of corresponding mask ratios  
+- `switch_epochs`: epoch boundaries between stages  
+
+Constraints:
+- `len(policies) == len(mask_ratios)`  
+- `len(switch_epochs) == len(policies) - 1`  
+- `switch_epochs` must be strictly increasing  
+
+Behaviour:
+- Each stage is active between switch points  
+- Final stage applies after the last switch  
+
+Example:
+
+```python
+
+Returns the active policy for a given epoch.
+
+---
+
+### Implemented Schedules
+
+#### ConstantSchedule
+
+- Uses a single policy throughout training  
+- No change over time  
+
+---
+
+#### DynamicSchedule
+
+General multi-stage schedule.
+
+Inputs:
+- `policies`: list of masking policies  
+- `mask_ratios`: list of corresponding mask ratios  
+- `switch_epochs`: epoch boundaries between stages  
+
+Constraints:
+- `len(policies) == len(mask_ratios)`  
+- `len(switch_epochs) == len(policies) - 1`  
+- `switch_epochs` must be strictly increasing  
+
+Behaviour:
+- Each stage is active between switch points  
+- Final stage applies after the last switch  
+
+Example:
+
+```
+
+---
+
+## Typical Usage
+
+### During Training
+
+1. Initialise schedule:
+
+```python
+schedule = DynamicSchedule(...)
+```
+
+2. At each epoch:
+
+```python
+scheduled = schedule.get(epoch)
+policy = scheduled.policy
+mask_ratio = scheduled.mask_ratio
+```
+
+3. Apply masking:
+
+```python
+masking = policy.sample_mask(...)
+masked_values = apply_mask_to_values(...)
+```
+
+---
+
+### During Evaluation
+
+- Policies are typically used directly (no schedule)  
+- Enables controlled comparison between masking strategies  
+
+---
+
+## Notes
+
+- Masking is applied only to valid (non-padding) tokens  
+- Padding values must be excluded via `valid_mask`  
+- Deterministic policies override probabilistic behaviour  
+- Weighted policies preserve the global mask ratio through normalisation  
+
+---
+
+## Summary
+
+This module provides a flexible framework for:
+
+- Defining masking strategies  
+- Controlling masking behaviour over time  
+- Enabling systematic experimentation with gene selection  
+
+It supports both:
+- standard MLM training  
+- targeted biological probing via custom masking  
